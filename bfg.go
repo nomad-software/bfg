@@ -18,7 +18,7 @@ func main() {
 
 	input := bufio.NewReader(os.Stdin)
 	stack := make([]byte, 30720)
-	loops := make([]int, 0, 1024)
+	loops := make([]int, 0, 2056)
 	cell := 0
 	skip := 0
 
