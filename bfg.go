@@ -11,15 +11,19 @@ func main() {
 
 	if len(os.Args) <= 1 {
 		fmt.Println("No program file argument")
-		os.Exit(1)
+		return
 	}
 
 	program, _ := ioutil.ReadFile(os.Args[1])
 
 	input := bufio.NewReader(os.Stdin)
+	output := bufio.NewWriter(os.Stdout)
+	defer output.Flush()
+
 	stack := make([]byte, 30720)
-	loops := make([]int, 0, 2056)
 	cell := 0
+	loops := make([]int, 2056)
+	loop := -1
 	skip := 0
 
 	for x := 0; x < len(program); x++ {
@@ -39,7 +43,10 @@ func main() {
 			stack[cell]--
 
 		case '.':
-			fmt.Printf("%c", stack[cell])
+			output.WriteByte(stack[cell])
+			if stack[cell] == '\n' {
+				output.Flush()
+			}
 
 		case ',':
 			stack[cell], _ = input.ReadByte()
@@ -56,14 +63,15 @@ func main() {
 					}
 				}
 			} else {
-				loops = append(loops, x)
+				loop++
+				loops[loop] = x
 			}
 
 		case ']':
 			if stack[cell] == 0 {
-				loops = loops[:len(loops)-1]
+				loop--
 			} else {
-				x = loops[len(loops)-1]
+				x = loops[loop]
 			}
 		}
 	}
