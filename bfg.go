@@ -26,21 +26,23 @@ func main() {
 	loop := -1
 	skip := 0
 
-	for x := 0; x < len(program); x++ {
+	ops := parseOperators(program)
 
-		switch program[x] {
+	for x := 0; x < len(ops); x++ {
+
+		switch ops[x].token {
 
 		case '>':
-			cell++
+			cell += ops[x].count
 
 		case '<':
-			cell--
+			cell -= ops[x].count
 
 		case '+':
-			stack[cell]++
+			stack[cell] += byte(ops[x].count)
 
 		case '-':
-			stack[cell]--
+			stack[cell] -= byte(ops[x].count)
 
 		case '.':
 			output.WriteByte(stack[cell])
@@ -56,9 +58,9 @@ func main() {
 				skip++
 				for skip > 0 {
 					x++
-					if program[x] == '[' {
+					if ops[x].token == '[' {
 						skip++
-					} else if program[x] == ']' {
+					} else if ops[x].token == ']' {
 						skip--
 					}
 				}
@@ -75,4 +77,57 @@ func main() {
 			}
 		}
 	}
+}
+
+// Operator is a struct holding a parsed operator and how many times it's used
+// consecutively.
+type operator struct {
+	token byte
+	count int
+}
+
+// ParseOperators reads the operators from the program and count the number of
+// times they are used consecutively.
+func parseOperators(program []byte) []operator {
+	ops := make([]operator, 1024)
+	var current operator
+
+	for x := 0; x < len(program); x++ {
+		op := program[x]
+
+		switch op {
+
+		case '>':
+			fallthrough
+		case '<':
+			fallthrough
+		case '+':
+			fallthrough
+		case '-':
+			if op == current.token {
+				current.count++
+				break
+			}
+
+			if current.token != 0 {
+				ops = append(ops, current)
+			}
+			current = operator{op, 1}
+			break
+
+		case '.':
+			fallthrough
+		case ',':
+			fallthrough
+		case '[':
+			fallthrough
+		case ']':
+			ops = append(ops, current)
+			current = operator{op, 1}
+			break
+		}
+	}
+
+	ops = append(ops, current)
+	return ops
 }
