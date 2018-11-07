@@ -36,16 +36,16 @@ func main() {
 		switch tokens[x].Type {
 
 		case token.Right:
-			cell += tokens[x].Count
+			cell += tokens[x].Shift
 
 		case token.Left:
-			cell -= tokens[x].Count
+			cell -= tokens[x].Shift
 
 		case token.Add:
-			stack[cell] += byte(tokens[x].Count)
+			stack[cell] += tokens[x].Value
 
 		case token.Sub:
-			stack[cell] -= byte(tokens[x].Count)
+			stack[cell] -= tokens[x].Value
 
 		case token.In:
 			stack[cell], _ = input.ReadByte()

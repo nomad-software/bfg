@@ -1,7 +1,7 @@
 package lexer
 
 import (
-	"strings"
+	"bytes"
 	"unicode/utf8"
 
 	"github.com/nomad-software/bfg/token"
@@ -51,7 +51,8 @@ func (l *Lexer) emit(typ byte) {
 	tok := token.Token{
 		Type:    typ,
 		Literal: l.read(),
-		Count:   len(l.read()),
+		Shift:   len(l.read()),
+		Value:   byte(len(l.read())),
 	}
 	l.Tokens = append(l.Tokens, tok)
 	l.start = l.pos
@@ -76,10 +77,17 @@ func (l *Lexer) advance() (r rune) {
 	return r
 }
 
+func (l *Lexer) retreat() {
+	if l.pos > l.start {
+		_, l.width = utf8.DecodeLastRuneInString(l.read())
+		l.pos -= l.width
+	}
+}
+
 func (l *Lexer) skipInvalid() {
 	for {
 		r := l.peek()
-		if r == EOF || strings.ContainsRune(token.All, r) {
+		if r == EOF || bytes.ContainsRune(token.All, r) {
 			return
 		}
 		l.advance()
