@@ -5,74 +5,11 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+
+	"github.com/nomad-software/bfg/lexer"
+	"github.com/nomad-software/bfg/token"
 )
 
-// Brainfuck operators.
-const (
-	right = '>'
-	left  = '<'
-	add   = '+'
-	sub   = '-'
-	in    = ','
-	out   = '.'
-	open  = '['
-	close = ']'
-)
-
-// Operator is a struct holding a parsed operator and how many times it's used
-// consecutively.
-type operator struct {
-	token byte
-	count int
-}
-
-// ParseOperators reads the operators from the program and count the number of
-// times they are used consecutively.
-func parseOperators(program []byte) []operator {
-	ops := make([]operator, 1024)
-	var current operator
-
-	for x := 0; x < len(program); x++ {
-		op := program[x]
-
-		switch op {
-
-		case right:
-			fallthrough
-		case left:
-			fallthrough
-		case add:
-			fallthrough
-		case sub:
-			if op == current.token {
-				current.count++
-				break
-			}
-
-			if current.token != 0 {
-				ops = append(ops, current)
-			}
-			current = operator{op, 1}
-			break
-
-		case in:
-			fallthrough
-		case out:
-			fallthrough
-		case open:
-			fallthrough
-		case close:
-			ops = append(ops, current)
-			current = operator{op, 1}
-			break
-		}
-	}
-
-	ops = append(ops, current)
-	return ops
-}
-
-// Main entry point.
 func main() {
 
 	if len(os.Args) <= 1 {
@@ -92,41 +29,41 @@ func main() {
 	start := -1
 	skip := 0
 
-	ops := parseOperators(program)
+	tokens := lexer.New(string(program)).Tokens
 
-	for x := 0; x < len(ops); x++ {
+	for x := 0; x < len(tokens); x++ {
 
-		switch ops[x].token {
+		switch tokens[x].Type {
 
-		case right:
-			cell += ops[x].count
+		case token.Right:
+			cell += tokens[x].Count
 
-		case left:
-			cell -= ops[x].count
+		case token.Left:
+			cell -= tokens[x].Count
 
-		case add:
-			stack[cell] += byte(ops[x].count)
+		case token.Add:
+			stack[cell] += byte(tokens[x].Count)
 
-		case sub:
-			stack[cell] -= byte(ops[x].count)
+		case token.Sub:
+			stack[cell] -= byte(tokens[x].Count)
 
-		case in:
+		case token.In:
 			stack[cell], _ = input.ReadByte()
 
-		case out:
+		case token.Out:
 			output.WriteByte(stack[cell])
 			if stack[cell] == '\n' {
 				output.Flush()
 			}
 
-		case open:
+		case token.Open:
 			if stack[cell] == 0 {
 				skip++
 				for skip > 0 {
 					x++
-					if ops[x].token == '[' {
+					if tokens[x].Type == token.Open {
 						skip++
-					} else if ops[x].token == ']' {
+					} else if tokens[x].Type == token.Close {
 						skip--
 					}
 				}
@@ -135,7 +72,7 @@ func main() {
 				loops[start] = x
 			}
 
-		case close:
+		case token.Close:
 			if stack[cell] == 0 {
 				start--
 			} else {
