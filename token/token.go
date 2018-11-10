@@ -1,6 +1,6 @@
 package token
 
-// Brainfuck operator types.
+// Brainfuck operators.
 const (
 	Left  byte = '<'
 	Right byte = '>'

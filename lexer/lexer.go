@@ -1,19 +1,11 @@
 package lexer
 
 import (
-	"bytes"
-	"unicode/utf8"
-
 	"github.com/nomad-software/bfg/token"
 )
 
-const (
-	// EOF represents the end of the input/file.
-	EOF = rune(token.EOF)
-)
-
 // New creates a new instance of the lexer channel.
-func New(input string) *Lexer {
+func New(input []byte) *Lexer {
 	l := &Lexer{
 		input:  input,
 		Tokens: make([]token.Token, 0),
@@ -24,7 +16,7 @@ func New(input string) *Lexer {
 
 // Lexer is the instance of the lexer.
 type Lexer struct {
-	input  string        // The string being scanned.
+	input  []byte        // The string being scanned.
 	start  int           // Start position of this item.
 	pos    int           // Current position in the input.
 	width  int           // Width of the last rune read.
@@ -39,18 +31,18 @@ func (l *Lexer) run() {
 	}
 }
 
-func (l *Lexer) read() string {
+func (l *Lexer) read() []byte {
 	return l.input[l.start:l.pos]
 }
 
-func (l *Lexer) unread() string {
+func (l *Lexer) unread() []byte {
 	return l.input[l.pos:]
 }
 
 func (l *Lexer) emit(typ byte) {
 	tok := token.Token{
 		Type:    typ,
-		Literal: l.read(),
+		Literal: string(l.read()),
 		Shift:   len(l.read()),
 		Value:   byte(len(l.read())),
 	}
@@ -58,37 +50,40 @@ func (l *Lexer) emit(typ byte) {
 	l.start = l.pos
 }
 
-func (l *Lexer) peek() (r rune) {
+func (l *Lexer) peek() byte {
 	if l.pos >= len(l.input) {
 		l.width = 0
-		return EOF
+		return token.EOF
 	}
-	r, _ = utf8.DecodeRuneInString(l.unread())
-	return r
+	return l.unread()[0]
 }
 
-func (l *Lexer) advance() (r rune) {
+func (l *Lexer) advance() (b byte) {
 	if l.pos >= len(l.input) {
 		l.width = 0
-		return EOF
+		return token.EOF
 	}
-	r, l.width = utf8.DecodeRuneInString(l.unread())
-	l.pos += l.width
-	return r
+	b = l.unread()[0]
+	l.pos++
+	return b
 }
 
 func (l *Lexer) retreat() {
 	if l.pos > l.start {
-		_, l.width = utf8.DecodeLastRuneInString(l.read())
-		l.pos -= l.width
+		l.pos--
 	}
 }
 
 func (l *Lexer) skipInvalid() {
 	for {
 		r := l.peek()
-		if r == EOF || bytes.ContainsRune(token.All, r) {
+		if r == token.EOF {
 			return
+		}
+		for _, op := range token.All {
+			if r == op {
+				return
+			}
 		}
 		l.advance()
 	}
@@ -105,7 +100,7 @@ func lex(l *Lexer) stateFn {
 
 		r := l.advance()
 
-		switch byte(r) {
+		switch r {
 		case token.Right:
 			fallthrough
 
@@ -137,12 +132,12 @@ func lex(l *Lexer) stateFn {
 }
 
 func lexRepeating(l *Lexer) stateFn {
-	r, _ := utf8.DecodeRuneInString(l.read())
-	for r == l.peek() {
+	b := l.read()[0]
+	for b == l.peek() {
 		l.advance()
 	}
 
-	l.emit(byte(r))
+	l.emit(b)
 	return lex
 }
 

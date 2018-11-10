@@ -29,7 +29,7 @@ func main() {
 	start := -1
 	skip := 0
 
-	tokens := lexer.New(string(program)).Tokens
+	tokens := lexer.New(program).Tokens
 
 	for x := 0; x < len(tokens); x++ {
 
