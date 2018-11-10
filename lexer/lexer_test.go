@@ -6,66 +6,79 @@ import (
 	"github.com/nomad-software/bfg/token"
 )
 
+var tokens []token.Token
+
+func BenchmarkLexer(b *testing.B) {
+	program := []byte(">++++++++[<+++++++++>-]<.>>+>+>++>[-]+<[>[->+<<++++>]<<]>.+++++++..+++.>>+++++++.<<<[[-]<[-]>]<+++++++++++++++.>>.+++.------.--------.>>+.>++++.")
+	var t []token.Token
+
+	for x := 0; x < b.N; x++ {
+		t = New(program).Tokens
+	}
+
+	tokens = t
+}
+
 func TestLexingSingleOperators(t *testing.T) {
-	program := `//this is a comment><+-foo,.[]bar`
+	program := []byte("//this is a comment><+-foo,.[]bar")
 
 	tests := []token.Token{
-		{token.Right, ">", 1},
-		{token.Left, "<", 1},
-		{token.Add, "+", 1},
-		{token.Sub, "-", 1},
-		{token.In, ",", 1},
-		{token.Out, ".", 1},
-		{token.Open, "[", 1},
-		{token.Close, "]", 1},
-		{token.EOF, "", 1},
+		{token.RightType, ">", 1, 1},
+		{token.LeftType, "<", 1, 1},
+		{token.AddType, "+", 1, 1},
+		{token.SubType, "-", 1, 1},
+		{token.InType, ",", 1, 1},
+		{token.OutType, ".", 1, 1},
+		{token.OpenType, "[", 1, 1},
+		{token.CloseType, "]", 1, 1},
+		{token.EOFType, "", 0, 0},
 	}
 
 	tokens := New(program).Tokens
 
 	for x := 0; x < len(tests); x++ {
-		if tokens[x].Type != tests[x].Type || tokens[x].Literal != tests[x].Literal {
+		if tokens[x].Type != tests[x].Type || tokens[x].Literal != tests[x].Literal || tokens[x].Shift != tests[x].Shift || tokens[x].Value != tests[x].Value {
 			fail(t, tests[x], tokens[x])
 		}
 	}
 }
 
 func TestLexingMultipleOperators(t *testing.T) {
-	program := `++++++++>+++>>>>+++<+...---<<-<--,,,.`
+	program := []byte("++++++++>+++>>>>+++<+...---<<-<--,,,.")
 
 	tests := []token.Token{
-		{token.Add, "++++++++", 8},
-		{token.Right, ">", 1},
-		{token.Add, "+++", 3},
-		{token.Right, ">>>>", 4},
-		{token.Add, "+++", 3},
-		{token.Left, "<", 1},
-		{token.Add, "+", 1},
-		{token.Out, ".", 1},
-		{token.Out, ".", 1},
-		{token.Out, ".", 1},
-		{token.Sub, "---", 3},
-		{token.Left, "<<", 2},
-		{token.Sub, "-", 1},
-		{token.Left, "<", 1},
-		{token.Sub, "--", 2},
-		{token.In, ",", 1},
-		{token.In, ",", 1},
-		{token.In, ",", 1},
-		{token.Out, ".", 1},
-		{token.EOF, "", 1},
+		{token.AddType, "++++++++", 8, 8},
+		{token.RightType, ">", 1, 1},
+		{token.AddType, "+++", 3, 3},
+		{token.RightType, ">>>>", 4, 4},
+		{token.AddType, "+++", 3, 3},
+		{token.LeftType, "<", 1, 1},
+		{token.AddType, "+", 1, 1},
+		{token.OutType, ".", 1, 1},
+		{token.OutType, ".", 1, 1},
+		{token.OutType, ".", 1, 1},
+		{token.SubType, "---", 3, 3},
+		{token.LeftType, "<<", 2, 2},
+		{token.SubType, "-", 1, 1},
+		{token.LeftType, "<", 1, 1},
+		{token.SubType, "--", 2, 2},
+		{token.InType, ",", 1, 1},
+		{token.InType, ",", 1, 1},
+		{token.InType, ",", 1, 1},
+		{token.OutType, ".", 1, 1},
+		{token.EOFType, "", 0, 0},
 	}
 
 	tokens := New(program).Tokens
 
 	for x := 0; x < len(tests); x++ {
-		if tokens[x].Type != tests[x].Type || tokens[x].Literal != tests[x].Literal {
+		if tokens[x].Type != tests[x].Type || tokens[x].Literal != tests[x].Literal || tokens[x].Shift != tests[x].Shift || tokens[x].Value != tests[x].Value {
 			fail(t, tests[x], tokens[x])
 		}
 	}
 }
 
 func fail(t *testing.T, a token.Token, b token.Token) {
-	t.Errorf("Expected Type: %q Literal: %q Count: %d", a.Type, a.Literal, a.Count)
-	t.Fatalf("Actual   Type: %q Literal: %q Count: %d", b.Type, b.Literal, b.Count)
+	t.Errorf("Expected: %#v", a)
+	t.Fatalf("Actual  : %#v", b)
 }

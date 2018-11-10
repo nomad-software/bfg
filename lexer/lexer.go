@@ -39,9 +39,9 @@ func (l *Lexer) unread() []byte {
 	return l.input[l.pos:]
 }
 
-func (l *Lexer) emit(typ byte) {
+func (l *Lexer) emit(t token.LexemeType) {
 	tok := token.Token{
-		Type:    typ,
+		Type:    t,
 		Literal: string(l.read()),
 		Shift:   len(l.read()),
 		Value:   byte(len(l.read())),
@@ -114,16 +114,16 @@ func lex(l *Lexer) stateFn {
 			return lexRepeating
 
 		case token.In:
-			l.emit(token.In)
+			l.emit(token.InType)
 
 		case token.Out:
-			l.emit(token.Out)
+			l.emit(token.OutType)
 
 		case token.Open:
-			l.emit(token.Open)
+			l.emit(token.OpenType)
 
 		case token.Close:
-			l.emit(token.Close)
+			l.emit(token.CloseType)
 
 		case token.EOF:
 			return lexEOF
@@ -137,11 +137,11 @@ func lexRepeating(l *Lexer) stateFn {
 		l.advance()
 	}
 
-	l.emit(b)
+	l.emit(token.LookupType(b))
 	return lex
 }
 
 func lexEOF(l *Lexer) stateFn {
-	l.emit(token.EOF)
+	l.emit(token.EOFType)
 	return nil
 }

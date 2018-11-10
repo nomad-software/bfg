@@ -35,35 +35,35 @@ func main() {
 
 		switch tokens[x].Type {
 
-		case token.Right:
+		case token.RightType:
 			cell += tokens[x].Shift
 
-		case token.Left:
+		case token.LeftType:
 			cell -= tokens[x].Shift
 
-		case token.Add:
+		case token.AddType:
 			stack[cell] += tokens[x].Value
 
-		case token.Sub:
+		case token.SubType:
 			stack[cell] -= tokens[x].Value
 
-		case token.In:
+		case token.InType:
 			stack[cell], _ = input.ReadByte()
 
-		case token.Out:
+		case token.OutType:
 			output.WriteByte(stack[cell])
 			if stack[cell] == '\n' {
 				output.Flush()
 			}
 
-		case token.Open:
+		case token.OpenType:
 			if stack[cell] == 0 {
 				skip++
 				for skip > 0 {
 					x++
-					if tokens[x].Type == token.Open {
+					if tokens[x].Type == token.OpenType {
 						skip++
-					} else if tokens[x].Type == token.Close {
+					} else if tokens[x].Type == token.CloseType {
 						skip--
 					}
 				}
@@ -72,7 +72,7 @@ func main() {
 				loops[start] = x
 			}
 
-		case token.Close:
+		case token.CloseType:
 			if stack[cell] == 0 {
 				start--
 			} else {
