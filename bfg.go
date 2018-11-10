@@ -78,6 +78,9 @@ func main() {
 			} else {
 				x = loops[start]
 			}
+
+		case token.ZeroType:
+			stack[cell] = 0
 		}
 	}
 }

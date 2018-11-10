@@ -32,6 +32,7 @@ const (
 	OpenType
 	CloseType
 	EOFType
+	ZeroType
 )
 
 // Token represents a unit of output from the lexer.

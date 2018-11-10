@@ -68,20 +68,20 @@ func (l *Lexer) advance() (b byte) {
 	return b
 }
 
-func (l *Lexer) retreat() {
+func (l *Lexer) retreat(i int) {
 	if l.pos > l.start {
-		l.pos--
+		l.pos -= i
 	}
 }
 
 func (l *Lexer) skipInvalid() {
 	for {
-		r := l.peek()
-		if r == token.EOF {
+		b := l.peek()
+		if b == token.EOF {
 			return
 		}
 		for _, op := range token.All {
-			if r == op {
+			if b == op {
 				return
 			}
 		}
@@ -120,7 +120,7 @@ func lex(l *Lexer) stateFn {
 			l.emit(token.OutType)
 
 		case token.Open:
-			l.emit(token.OpenType)
+			return lexOpen
 
 		case token.Close:
 			l.emit(token.CloseType)
@@ -138,6 +138,30 @@ func lexRepeating(l *Lexer) stateFn {
 	}
 
 	l.emit(token.LookupType(b))
+	return lex
+}
+
+func lexSequence(l *Lexer, seq []byte, t token.LexemeType) stateFn {
+	pos := l.pos
+	for _, b := range seq {
+		if b == l.peek() {
+			l.advance()
+		} else {
+			l.retreat(l.pos - pos)
+			return nil
+		}
+	}
+
+	l.emit(t)
+	return lex
+}
+
+func lexOpen(l *Lexer) stateFn {
+	s := lexSequence(l, []byte{token.Sub, token.Close}, token.ZeroType)
+	if s != nil {
+		return s
+	}
+	l.emit(token.OpenType)
 	return lex
 }
 
