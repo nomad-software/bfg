@@ -156,6 +156,19 @@ func lexSequence(l *Lexer, seq []byte, t token.LexemeType) stateFn {
 	return lex
 }
 
+func lexZero(l *Lexer) stateFn {
+	if l.peek() == token.Sub {
+		l.advance()
+		if l.peek() == token.Close {
+			l.advance()
+			l.emit(token.ZeroType)
+			return lex
+		}
+		l.retreat(1)
+	}
+	return nil
+}
+
 func lexOpen(l *Lexer) stateFn {
 	s := lexSequence(l, []byte{token.Sub, token.Close}, token.ZeroType)
 	if s != nil {
