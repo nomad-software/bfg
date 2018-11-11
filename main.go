@@ -10,14 +10,8 @@ import (
 	"github.com/nomad-software/bfg/token"
 )
 
-func main() {
-
-	if len(os.Args) <= 1 {
-		fmt.Println("No program file argument")
-		return
-	}
-
-	program, _ := ioutil.ReadFile(os.Args[1])
+// Evaluate the program.
+func evaluate(tokens []token.Token) {
 
 	input := bufio.NewReader(os.Stdin)
 	output := bufio.NewWriter(os.Stdout)
@@ -28,8 +22,6 @@ func main() {
 	loops := make([]int, 2056)
 	start := -1
 	skip := 0
-
-	tokens := lexer.New(program).Tokens
 
 	for x := 0; x < len(tokens); x++ {
 
@@ -83,4 +75,16 @@ func main() {
 			stack[cell] = 0
 		}
 	}
+}
+
+func main() {
+
+	if len(os.Args) <= 1 {
+		fmt.Println("No program file argument")
+		return
+	}
+
+	program, _ := ioutil.ReadFile(os.Args[1])
+	tokens := lexer.New(program).Tokens
+	evaluate(tokens)
 }
