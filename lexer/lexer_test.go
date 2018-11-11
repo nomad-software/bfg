@@ -1,6 +1,10 @@
 package lexer
 
 import (
+	"io/ioutil"
+	"log"
+	"os"
+	"path"
 	"testing"
 
 	"github.com/nomad-software/bfg/token"
@@ -9,8 +13,18 @@ import (
 var tokens []token.Token
 
 func BenchmarkLexer(b *testing.B) {
-	program := []byte(">++++++++[<+++++++++>-]<.>>+>+>++>[-]+<[>[->+<<++++>]<<]>.+++++++..+++.>>+++++++.<<<[[-]<[-]>]<+++++++++++++++.>>.+++.------.--------.>>+.>++++.")
+	wd, err := os.Getwd()
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	program, err := ioutil.ReadFile(path.Join(wd, "../programs/mandelbrot.bf"))
+	if err != nil {
+		log.Fatalln(err)
+	}
 	var t []token.Token
+
+	b.ResetTimer()
 
 	for x := 0; x < b.N; x++ {
 		t = New(program).Tokens
@@ -22,7 +36,7 @@ func BenchmarkLexer(b *testing.B) {
 func TestLexingSingleOperators(t *testing.T) {
 	program := []byte("//this is a comment><+-foo,.[]bar")
 
-	tests := []token.Token{
+	tokens := []token.Token{
 		{token.RightType, ">", 1, 1},
 		{token.LeftType, "<", 1, 1},
 		{token.AddType, "+", 1, 1},
@@ -34,19 +48,13 @@ func TestLexingSingleOperators(t *testing.T) {
 		{token.EOFType, "", 0, 0},
 	}
 
-	tokens := New(program).Tokens
-
-	for x := 0; x < len(tests); x++ {
-		if tokens[x].Type != tests[x].Type || tokens[x].Literal != tests[x].Literal || tokens[x].Shift != tests[x].Shift || tokens[x].Value != tests[x].Value {
-			fail(t, tests[x], tokens[x])
-		}
-	}
+	assertTokens(t, program, tokens)
 }
 
 func TestLexingMultipleOperators(t *testing.T) {
 	program := []byte("++++++++>+++>>>>+++<+...---<<-<--,,,.")
 
-	tests := []token.Token{
+	tokens := []token.Token{
 		{token.AddType, "++++++++", 8, 8},
 		{token.RightType, ">", 1, 1},
 		{token.AddType, "+++", 3, 3},
@@ -69,16 +77,41 @@ func TestLexingMultipleOperators(t *testing.T) {
 		{token.EOFType, "", 0, 0},
 	}
 
-	tokens := New(program).Tokens
-
-	for x := 0; x < len(tests); x++ {
-		if tokens[x].Type != tests[x].Type || tokens[x].Literal != tests[x].Literal || tokens[x].Shift != tests[x].Shift || tokens[x].Value != tests[x].Value {
-			fail(t, tests[x], tokens[x])
-		}
-	}
+	assertTokens(t, program, tokens)
 }
 
-func fail(t *testing.T, a token.Token, b token.Token) {
-	t.Errorf("Expected: %#v", a)
-	t.Fatalf("Actual  : %#v", b)
+func TestLexingZeroOptimisation(t *testing.T) {
+	program := []byte("++++++++++[-]++++++++++[-]+++++[->+<]")
+
+	tokens := []token.Token{
+		{token.AddType, "++++++++++", 10, 10},
+		{token.ZeroType, "[-]", 3, 3},
+		{token.AddType, "++++++++++", 10, 10},
+		{token.ZeroType, "[-]", 3, 3},
+		{token.AddType, "+++++", 5, 5},
+		{token.OpenType, "[", 1, 1},
+		{token.SubType, "-", 1, 1},
+		{token.RightType, ">", 1, 1},
+		{token.AddType, "+", 1, 1},
+		{token.LeftType, "<", 1, 1},
+		{token.CloseType, "]", 1, 1},
+		{token.EOFType, "", 0, 0},
+	}
+
+	assertTokens(t, program, tokens)
+}
+
+func assertTokens(t *testing.T, program []byte, tokens []token.Token) {
+	output := New(program).Tokens
+
+	for x := 0; x < len(tokens); x++ {
+		if output[x].Type != tokens[x].Type ||
+			output[x].Literal != tokens[x].Literal ||
+			output[x].Shift != tokens[x].Shift ||
+			output[x].Value != tokens[x].Value {
+
+			t.Errorf("Expected: %#v", tokens[x])
+			t.Fatalf("Actual  : %#v", output[x])
+		}
+	}
 }
