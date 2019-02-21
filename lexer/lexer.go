@@ -170,8 +170,7 @@ func lexZero(l *Lexer) stateFn {
 }
 
 func lexOpen(l *Lexer) stateFn {
-	s := lexSequence(l, []byte{token.Sub, token.Close}, token.ZeroType)
-	// s := lexZero(l) // Why does this slow the evaluator down???
+	s := lexZero(l)
 	if s != nil {
 		return s
 	}
