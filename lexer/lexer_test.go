@@ -18,7 +18,7 @@ func BenchmarkLexer(b *testing.B) {
 		log.Fatalln(err)
 	}
 
-	program, err := ioutil.ReadFile(path.Join(wd, "../programs/mandelbrot.bf"))
+	program, err := ioutil.ReadFile(path.Join(wd, "../programs/lost-kingdom.bf"))
 	if err != nil {
 		log.Fatalln(err)
 	}
