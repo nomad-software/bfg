@@ -18,12 +18,14 @@ func BenchmarkLexer(b *testing.B) {
 		log.Fatalln(err)
 	}
 
-	program, err := ioutil.ReadFile(path.Join(wd, "../programs/lost-kingdom.bf"))
+	program, err := ioutil.ReadFile(path.Join(wd, "../programs/mandelbrot.bf"))
 	if err != nil {
 		log.Fatalln(err)
 	}
 	var t []token.Token
 
+	b.SetBytes(int64(len(program)))
+	b.ReportAllocs()
 	b.ResetTimer()
 
 	for x := 0; x < b.N; x++ {
