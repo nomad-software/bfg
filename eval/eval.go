@@ -10,9 +10,9 @@ import (
 func Evaluate(tokens []token.Token, input bufio.Reader, output bufio.Writer) {
 
 	stack := make([]byte, 30720)
-	cell := 0
-	loops := make([]int, 2056)
-	start := -1
+	ptr := 0
+	origin := make([]int, 2056)
+	loop := -1
 	skip := 0
 
 	for x := 0; x < len(tokens); x++ {
@@ -20,28 +20,28 @@ func Evaluate(tokens []token.Token, input bufio.Reader, output bufio.Writer) {
 		switch tokens[x].Type {
 
 		case token.RightType:
-			cell += tokens[x].Shift
+			ptr += tokens[x].Shift
 
 		case token.LeftType:
-			cell -= tokens[x].Shift
+			ptr -= tokens[x].Shift
 
 		case token.AddType:
-			stack[cell] += tokens[x].Value
+			stack[ptr] += tokens[x].Value
 
 		case token.SubType:
-			stack[cell] -= tokens[x].Value
+			stack[ptr] -= tokens[x].Value
 
 		case token.InType:
-			stack[cell], _ = input.ReadByte()
+			stack[ptr], _ = input.ReadByte()
 
 		case token.OutType:
-			output.WriteByte(stack[cell])
-			if stack[cell] == '\n' {
+			output.WriteByte(stack[ptr])
+			if stack[ptr] == '\n' {
 				output.Flush()
 			}
 
 		case token.OpenType:
-			if stack[cell] == 0 {
+			if stack[ptr] == 0 {
 				skip++
 				for skip > 0 {
 					x++
@@ -52,19 +52,19 @@ func Evaluate(tokens []token.Token, input bufio.Reader, output bufio.Writer) {
 					}
 				}
 			} else {
-				start++
-				loops[start] = x
+				loop++
+				origin[loop] = x
 			}
 
 		case token.CloseType:
-			if stack[cell] == 0 {
-				start--
+			if stack[ptr] == 0 {
+				loop--
 			} else {
-				x = loops[start]
+				x = origin[loop]
 			}
 
 		case token.ZeroType:
-			stack[cell] = 0
+			stack[ptr] = 0
 		}
 	}
 }
