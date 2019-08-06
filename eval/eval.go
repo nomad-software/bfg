@@ -52,6 +52,9 @@ func Evaluate(tokens []token.Token, input bufio.Reader, output bufio.Writer) {
 
 		case token.ZeroType:
 			stack[ptr] = 0
+
+		case token.EOFType:
+			output.Flush()
 		}
 	}
 }
