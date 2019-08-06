@@ -6,17 +6,17 @@ import (
 	"github.com/nomad-software/bfg/token"
 )
 
+const (
+	stackSize = 1 << 16
+)
+
 // Evaluate evaluates the program and executes it.
 func Evaluate(tokens []token.Token, input bufio.Reader, output bufio.Writer) {
 
-	stack := make([]byte, 30720)
+	var stack [stackSize]byte
 	ptr := 0
-	origin := make([]int, 2056)
-	loop := -1
-	skip := 0
 
 	for x := 0; x < len(tokens); x++ {
-
 		switch tokens[x].Type {
 
 		case token.RightType:
@@ -42,25 +42,12 @@ func Evaluate(tokens []token.Token, input bufio.Reader, output bufio.Writer) {
 
 		case token.OpenType:
 			if stack[ptr] == 0 {
-				skip++
-				for skip > 0 {
-					x++
-					if tokens[x].Type == token.OpenType {
-						skip++
-					} else if tokens[x].Type == token.CloseType {
-						skip--
-					}
-				}
-			} else {
-				loop++
-				origin[loop] = x
+				x = tokens[x].Jump
 			}
 
 		case token.CloseType:
-			if stack[ptr] == 0 {
-				loop--
-			} else {
-				x = origin[loop]
+			if stack[ptr] != 0 {
+				x = tokens[x].Jump
 			}
 
 		case token.ZeroType:

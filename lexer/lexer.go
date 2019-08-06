@@ -8,7 +8,7 @@ import (
 func New(input []byte) *Lexer {
 	l := &Lexer{
 		input:  input,
-		Tokens: make([]token.Token, 0),
+		Tokens: make([]token.Token, 0, 8192),
 	}
 	l.run()
 	return l
@@ -18,8 +18,8 @@ func New(input []byte) *Lexer {
 type Lexer struct {
 	input  []byte        // The string being scanned.
 	start  int           // Start position of this item.
-	pos    int           // Current position in the input.
-	width  int           // Width of the last rune read.
+	end    int           // Current position in the input.
+	loops  []int         // Indexes of open lexeme types
 	Tokens []token.Token // Lexed tokens
 }
 
@@ -32,11 +32,11 @@ func (l *Lexer) run() {
 }
 
 func (l *Lexer) read() []byte {
-	return l.input[l.start:l.pos]
+	return l.input[l.start:l.end]
 }
 
 func (l *Lexer) unread() []byte {
-	return l.input[l.pos:]
+	return l.input[l.end:]
 }
 
 func (l *Lexer) emit(t token.LexemeType) {
@@ -46,31 +46,41 @@ func (l *Lexer) emit(t token.LexemeType) {
 		Shift:   len(l.read()),
 		Value:   byte(len(l.read())),
 	}
+
+	if t == token.OpenType {
+		l.loops = append(l.loops, len(l.Tokens))
+	}
+
+	if t == token.CloseType {
+		tok.Jump = l.loops[len(l.loops)-1]
+		l.loops = l.loops[:len(l.loops)-1]
+
+		l.Tokens[tok.Jump].Jump = len(l.Tokens)
+	}
+
 	l.Tokens = append(l.Tokens, tok)
-	l.start = l.pos
+	l.start = l.end
 }
 
 func (l *Lexer) peek() byte {
-	if l.pos >= len(l.input) {
-		l.width = 0
+	if l.end >= len(l.input) {
 		return token.EOF
 	}
 	return l.unread()[0]
 }
 
 func (l *Lexer) advance() (b byte) {
-	if l.pos >= len(l.input) {
-		l.width = 0
+	if l.end >= len(l.input) {
 		return token.EOF
 	}
 	b = l.unread()[0]
-	l.pos++
+	l.end++
 	return b
 }
 
 func (l *Lexer) retreat(i int) {
-	if l.pos > l.start {
-		l.pos -= i
+	if l.end > l.start {
+		l.end -= i
 	}
 }
 
@@ -90,7 +100,7 @@ func (l *Lexer) skipInvalid() {
 }
 
 func (l *Lexer) discard() {
-	l.start = l.pos
+	l.start = l.end
 }
 
 func lex(l *Lexer) stateFn {
@@ -142,12 +152,12 @@ func lexRepeating(l *Lexer) stateFn {
 }
 
 func lexSequence(l *Lexer, seq []byte, t token.LexemeType) stateFn {
-	pos := l.pos
+	pos := l.end
 	for _, b := range seq {
 		if b == l.peek() {
 			l.advance()
 		} else {
-			l.retreat(l.pos - pos)
+			l.retreat(l.end - pos)
 			return nil
 		}
 	}
