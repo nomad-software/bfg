@@ -2,11 +2,8 @@ package nasm
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"os/exec"
-	"path/filepath"
-	"strings"
 
 	"github.com/nomad-software/bfg/token"
 )
@@ -19,18 +16,6 @@ func Compile(tokens []token.Token, name string) {
 
 	link(object, name)
 	run(name)
-}
-
-type assembly struct {
-	src strings.Builder
-}
-
-func (a *assembly) write(format string, args ...interface{}) {
-	a.src.WriteString(fmt.Sprintf(format+"\n", args...))
-}
-
-func (a *assembly) String() string {
-	return a.src.String()
 }
 
 func generateAssembly(tokens []token.Token) string {
@@ -102,18 +87,6 @@ func generateAssembly(tokens []token.Token) string {
 	return asm.String()
 }
 
-func writeFile(program string) string {
-	file := "/tmp/bfg.asm"
-
-	err := ioutil.WriteFile(file, []byte(program), 0666)
-	if err != nil {
-		fmt.Printf("Can't write assembly file (%s). %s\n", file, err.Error())
-		os.Exit(1)
-	}
-
-	return file
-}
-
 func compileNasm(file string) string {
 	obj := "/tmp/bfg.o"
 	cmd := exec.Command("nasm", "-f", "elf64", "-o", obj, file)
@@ -128,29 +101,11 @@ func compileNasm(file string) string {
 }
 
 func link(object string, exe string) {
-	cmd := exec.Command("ld", "/tmp/bfg.o", "-o", exe)
+	cmd := exec.Command("ld", "-m", "elf_x86_64", "/tmp/bfg.o", "-o", exe)
 
 	err := cmd.Run()
 	if err != nil {
 		fmt.Printf("Can't run the GNU linker (ld). %s\n", err.Error())
-		os.Exit(1)
-	}
-}
-
-func run(exe string) {
-	exe, err := filepath.Abs(exe)
-	if err != nil {
-		fmt.Printf("Can't run %s. %s\n", exe, err.Error())
-		os.Exit(1)
-	}
-
-	cmd := exec.Command(exe)
-	cmd.Stdin = os.Stdin
-	cmd.Stdout = os.Stdout
-
-	err = cmd.Run()
-	if err != nil {
-		fmt.Printf("Can't run %s. %s\n", exe, err.Error())
 		os.Exit(1)
 	}
 }
