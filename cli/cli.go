@@ -26,7 +26,7 @@ func ParseOptions() *Options {
 
 // PrintUsage prints the usage of the program.
 func (opt *Options) PrintUsage() {
-	var banner = ` _      __       
+	var banner = ` _      __
 | |__  / _| __ _
 | '_ \| |_ / _' |
 | |_) |  _| (_| |
