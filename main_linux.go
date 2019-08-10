@@ -1,5 +1,3 @@
-// +build !linux
-
 package main
 
 import (
@@ -11,6 +9,7 @@ import (
 	"github.com/nomad-software/bfg/cli"
 	"github.com/nomad-software/bfg/eval"
 	"github.com/nomad-software/bfg/lexer"
+	"github.com/nomad-software/bfg/nasm"
 )
 
 // Evaluate the program.
@@ -29,9 +28,13 @@ func main() {
 
 	tokens := lexer.New(program).Tokens
 
-	input := bufio.NewReader(os.Stdin)
-	output := bufio.NewWriter(os.Stdout)
-	defer output.Flush()
+	if opt.Interpret {
+		input := bufio.NewReader(os.Stdin)
+		output := bufio.NewWriter(os.Stdout)
+		defer output.Flush()
+		eval.Evaluate(tokens, *input, *output)
 
-	eval.Evaluate(tokens, *input, *output)
+	} else {
+		nasm.Compile(tokens, opt.Exe)
+	}
 }
