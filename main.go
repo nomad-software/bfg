@@ -6,29 +6,35 @@ import (
 	"io/ioutil"
 	"os"
 
+	"github.com/nomad-software/bfg/cli"
 	"github.com/nomad-software/bfg/eval"
 	"github.com/nomad-software/bfg/lexer"
+	"github.com/nomad-software/bfg/nasm"
 )
 
 // Evaluate the program.
 func main() {
+	opt := cli.ParseOptions()
 
-	if len(os.Args) <= 1 {
-		fmt.Println("No program file argument")
-		os.Exit(1)
+	if opt.Help {
+		opt.PrintUsage()
 	}
 
-	program, err := ioutil.ReadFile(os.Args[1])
+	program, err := ioutil.ReadFile(opt.File)
 	if err != nil {
 		fmt.Printf("Can't read program file. %s\n", err.Error())
 		os.Exit(1)
 	}
 
-	input := bufio.NewReader(os.Stdin)
-	output := bufio.NewWriter(os.Stdout)
-	defer output.Flush()
-
 	tokens := lexer.New(program).Tokens
 
-	eval.Evaluate(tokens, *input, *output)
+	if opt.Interpret {
+		input := bufio.NewReader(os.Stdin)
+		output := bufio.NewWriter(os.Stdout)
+		defer output.Flush()
+		eval.Evaluate(tokens, *input, *output)
+
+	} else {
+		nasm.Compile(tokens, opt.Exe)
+	}
 }
