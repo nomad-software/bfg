@@ -21,14 +21,6 @@ func newAssembly(tokens []token.Token) nasm {
 	asm.write("_start:")
 	asm.write("mov r8, stack")
 
-	// This write seems unnecessary but it's required or else subsequent reads from
-	// stdin fail. I need to investigate why.
-	asm.write("mov rax, 1")
-	asm.write("mov rdi, 1")
-	asm.write("mov rsi, r8")
-	asm.write("mov rdx, 1")
-	asm.write("syscall")
-
 	for i, t := range tokens {
 		switch t.Type {
 
@@ -48,6 +40,7 @@ func newAssembly(tokens []token.Token) nasm {
 			asm.write("mov rax, 0")
 			asm.write("mov rdi, 0")
 			asm.write("mov rsi, r8")
+			asm.write("mov rdx, 1")
 			asm.write("syscall")
 
 		case token.OutType:
