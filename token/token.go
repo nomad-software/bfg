@@ -37,11 +37,10 @@ const (
 
 // Token represents a unit of output from the lexer.
 type Token struct {
-	Type    LexemeType // The token lexeme type
-	Literal string     // The lexed source code
-	Shift   int        // An amount to shift a stack pointer
-	Value   byte       // A delta value to modify a stack cell's value
-	Jump    int        // A matching position of a lexeme
+	Type  LexemeType // The token lexeme type
+	Shift int        // An amount to shift a stack pointer
+	Value byte       // A delta value to modify a stack cell's value
+	Jump  int        // A matching position of a lexeme
 }
 
 var types = map[byte]LexemeType{

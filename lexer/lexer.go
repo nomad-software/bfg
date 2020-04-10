@@ -41,10 +41,9 @@ func (l *Lexer) unread() []byte {
 
 func (l *Lexer) emit(t token.LexemeType) {
 	tok := token.Token{
-		Type:    t,
-		Literal: string(l.read()),
-		Shift:   len(l.read()),
-		Value:   byte(len(l.read())),
+		Type:  t,
+		Shift: len(l.read()),
+		Value: byte(len(l.read())),
 	}
 
 	if t == token.OpenType {
