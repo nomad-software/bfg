@@ -28,6 +28,7 @@ func BenchmarkEvaluator(b *testing.B) {
 
 	tokens := lexer.New(program).Tokens
 
+	b.ReportAllocs()
 	b.ResetTimer()
 
 	for x := 0; x < b.N; x++ {
