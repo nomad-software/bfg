@@ -8,7 +8,7 @@ import (
 func New(input []byte) *Lexer {
 	l := &Lexer{
 		input:  input,
-		Tokens: make([]token.Token, 0, 8192),
+		Tokens: make([]token.Token, 0, 4096),
 	}
 	l.run()
 	return l
