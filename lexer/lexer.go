@@ -150,23 +150,17 @@ func lexRepeating(l *Lexer) stateFn {
 	return lex
 }
 
-func lexSequence(l *Lexer, seq []byte, t token.LexemeType) stateFn {
-	pos := l.end
-	for _, b := range seq {
-		if b == l.peek() {
-			l.advance()
-		} else {
-			l.retreat(l.end - pos)
-			return nil
-		}
-	}
-
-	l.emit(t)
-	return lex
-}
-
 func lexZero(l *Lexer) stateFn {
-	return lexSequence(l, []byte{token.Sub, token.Close}, token.ZeroType)
+	if l.peek() == token.Sub {
+		l.advance()
+		if l.peek() == token.Close {
+			l.advance()
+			l.emit(token.ZeroType)
+			return lex
+		}
+		l.retreat(1)
+	}
+	return nil
 }
 
 func lexOpen(l *Lexer) stateFn {
