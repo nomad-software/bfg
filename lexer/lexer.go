@@ -146,7 +146,22 @@ func lexRepeating(l *Lexer) stateFn {
 		l.advance()
 	}
 
-	l.emit(token.LookupType(b))
+	if b == token.Right {
+		l.emit(token.RightType)
+	}
+
+	if b == token.Left {
+		l.emit(token.LeftType)
+	}
+
+	if b == token.Add {
+		l.emit(token.AddType)
+	}
+
+	if b == token.Sub {
+		l.emit(token.SubType)
+	}
+
 	return lex
 }
 
