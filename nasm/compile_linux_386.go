@@ -52,16 +52,25 @@ func newAssembly(tokens []token.Token) nasm {
 
 		case token.OpenType:
 			asm.write("cmp byte [edi], 0")
-			asm.write("je close_loop_%d", t.Jump)
+			asm.write("je close_loop_%d", i)
 			asm.write("open_loop_%d:", i)
 
 		case token.CloseType:
 			asm.write("cmp byte [edi], 0")
 			asm.write("jne open_loop_%d", t.Jump)
-			asm.write("close_loop_%d:", i)
+			asm.write("close_loop_%d:", t.Jump)
 
 		case token.ZeroType:
 			asm.write("mov byte [edi], 0")
+
+		case token.CopyType:
+			asm.write("mov byte al, [edi]")
+			asm.write("mov byte [edi], 0")
+			for i := 1; i <= t.Shift; i++ {
+				asm.write("inc edi")
+				asm.write("add byte [edi], al")
+			}
+			asm.write("sub edi, %d", t.Shift)
 		}
 	}
 

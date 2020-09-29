@@ -53,6 +53,12 @@ func Evaluate(tokens []token.Token, input bufio.Reader, output bufio.Writer) {
 		case token.ZeroType:
 			stack[ptr] = 0
 
+		case token.CopyType:
+			for i := 1; i <= tokens[x].Shift; i++ {
+				stack[ptr+i] += stack[ptr]
+			}
+			stack[ptr] = 0
+
 		case token.EOFType:
 			output.Flush()
 		}

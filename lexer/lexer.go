@@ -53,8 +53,17 @@ func (l *Lexer) emit(t token.LexemeType) {
 	if t == token.CloseType {
 		tok.Jump = l.loops[len(l.loops)-1]
 		l.loops = l.loops[:len(l.loops)-1]
-
 		l.Tokens[tok.Jump].Jump = len(l.Tokens)
+	}
+
+	if t == token.CopyType {
+		tok.Shift = 0
+		tok.Value = 0
+		for _, b := range l.read() {
+			if b == token.Right {
+				tok.Shift++
+			}
+		}
 	}
 
 	l.Tokens = append(l.Tokens, tok)
@@ -165,7 +174,7 @@ func lexRepeating(l *Lexer) stateFn {
 	return lex
 }
 
-func lexZero(l *Lexer) stateFn {
+func lexZeroLoop(l *Lexer) stateFn {
 	if l.peek() == token.Sub {
 		l.advance()
 		if l.peek() == token.Close {
@@ -178,8 +187,46 @@ func lexZero(l *Lexer) stateFn {
 	return nil
 }
 
+func lexCopyLoop(l *Lexer) stateFn {
+	pos := l.end
+	rightShift := 0
+	leftShift := 0
+	if l.peek() == token.Sub {
+		l.advance()
+
+	exit:
+		for {
+			if l.peek() == token.Right {
+				l.advance()
+				if l.peek() == token.Add {
+					l.advance()
+					rightShift++
+				} else {
+					break exit
+				}
+			} else if rightShift > 0 && l.peek() == token.Left {
+				l.advance()
+				leftShift++
+			} else if rightShift > 0 && rightShift == leftShift && l.peek() == token.Close {
+				l.advance()
+				l.emit(token.CopyType)
+				return lex
+			} else {
+				break exit
+			}
+		}
+	}
+
+	l.retreat(l.end - pos)
+	return nil
+}
+
 func lexOpen(l *Lexer) stateFn {
-	s := lexZero(l)
+	s := lexZeroLoop(l)
+	if s != nil {
+		return s
+	}
+	s = lexCopyLoop(l)
 	if s != nil {
 		return s
 	}
