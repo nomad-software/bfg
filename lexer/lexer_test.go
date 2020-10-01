@@ -91,20 +91,75 @@ func TestLexingZeroOptimisation(t *testing.T) {
 		{Type: token.AddType, Shift: 10, Value: 10},
 		{Type: token.ZeroType, Shift: 3, Value: 3},
 		{Type: token.AddType, Shift: 5, Value: 5},
-		{Type: token.CopyType, Shift: 1},
+		{Type: token.RightShiftAddType, Shift: 1},
 		{Type: token.EOFType},
 	}
 
 	assertTokens(t, program, tokens)
 }
 
-func TestLexingCopyOptimisation(t *testing.T) {
-	program := []byte("++++++++++[->+>+>+<<<][->+>+>+>+>+<<<<<]")
+func TestLexingRightShiftAddLoopOptimisation(t *testing.T) {
+	program := []byte("++++++++++[->+<][->+<<][->>>+<<<][->>>>>+<<<<<]")
 
 	tokens := []token.Token{
 		{Type: token.AddType, Shift: 10, Value: 10},
-		{Type: token.CopyType, Shift: 3},
-		{Type: token.CopyType, Shift: 5},
+		{Type: token.RightShiftAddType, Shift: 1},
+		{Type: token.OpenType, Shift: 1, Value: 1, Jump: 7},
+		{Type: token.SubType, Shift: 1, Value: 1},
+		{Type: token.RightType, Shift: 1, Value: 1},
+		{Type: token.AddType, Shift: 1, Value: 1},
+		{Type: token.LeftType, Shift: 2, Value: 2},
+		{Type: token.CloseType, Shift: 1, Value: 1, Jump: 2},
+		{Type: token.RightShiftAddType, Shift: 3},
+		{Type: token.RightShiftAddType, Shift: 5},
+		{Type: token.EOFType},
+	}
+
+	assertTokens(t, program, tokens)
+}
+
+// func TestLexingLeftShiftAddLoopOptimisation(t *testing.T) {
+// 	program := []byte("++++++++++[-<+>][-<<<<<+>>>>>][-<+>>][-<<<+>>>]")
+
+// 	tokens := []token.Token{
+// 		{Type: token.AddType, Shift: 10, Value: 10},
+// 		{Type: token.LeftShiftAddType, Shift: 1},
+// 		{Type: token.LeftShiftAddType, Shift: 5},
+// 		{Type: token.OpenType, Shift: 1, Value: 1, Jump: 8},
+// 		{Type: token.SubType, Shift: 1, Value: 1},
+// 		{Type: token.LeftType, Shift: 1, Value: 1},
+// 		{Type: token.AddType, Shift: 1, Value: 1},
+// 		{Type: token.RightType, Shift: 2, Value: 2},
+// 		{Type: token.CloseType, Shift: 1, Value: 1, Jump: 3},
+// 		{Type: token.LeftShiftAddType, Shift: 3},
+// 		{Type: token.EOFType},
+// 	}
+
+// 	assertTokens(t, program, tokens)
+// }
+
+func TestLexingRightLinearAddLoopOptimisation(t *testing.T) {
+	program := []byte("++++++++++[->+<][->+>+>+<<<][->+>+>+>+>+<<<<<]")
+
+	tokens := []token.Token{
+		{Type: token.AddType, Shift: 10, Value: 10},
+		{Type: token.RightShiftAddType, Shift: 1},
+		{Type: token.RightLinearAddType, Shift: 3},
+		{Type: token.RightLinearAddType, Shift: 5},
+		{Type: token.EOFType},
+	}
+
+	assertTokens(t, program, tokens)
+}
+
+func TestLexingLeftLinearAddLoopOptimisation(t *testing.T) {
+	program := []byte("++++++++++[-<+>][-<+<+<+>>>][-<+<+<+<+<+>>>>>]")
+
+	tokens := []token.Token{
+		{Type: token.AddType, Shift: 10, Value: 10},
+		{Type: token.LeftLinearAddType, Shift: 1},
+		{Type: token.LeftLinearAddType, Shift: 3},
+		{Type: token.LeftLinearAddType, Shift: 5},
 		{Type: token.EOFType},
 	}
 

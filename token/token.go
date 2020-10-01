@@ -33,7 +33,10 @@ const (
 	CloseType
 	EOFType
 	ZeroType
-	CopyType
+	RightShiftAddType
+	LeftShiftAddType
+	RightLinearAddType
+	LeftLinearAddType
 )
 
 // Token represents a unit of output from the lexer.

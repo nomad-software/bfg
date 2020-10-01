@@ -63,7 +63,14 @@ func newAssembly(tokens []token.Token) nasm {
 		case token.ZeroType:
 			asm.write("mov byte [edi], 0")
 
-		case token.CopyType:
+		case token.RightShiftAddType:
+			asm.write("mov byte al, [edi]")
+			asm.write("mov byte [edi], 0")
+			asm.write("add edi, %d", t.Shift)
+			asm.write("add byte [edi], al")
+			asm.write("sub edi, %d", t.Shift)
+
+		case token.RightLinearAddType:
 			asm.write("mov byte al, [edi]")
 			asm.write("mov byte [edi], 0")
 			for i := 1; i <= t.Shift; i++ {
@@ -71,6 +78,15 @@ func newAssembly(tokens []token.Token) nasm {
 				asm.write("add byte [edi], al")
 			}
 			asm.write("sub edi, %d", t.Shift)
+
+		case token.LeftLinearAddType:
+			asm.write("mov byte al, [edi]")
+			asm.write("mov byte [edi], 0")
+			for i := 1; i <= t.Shift; i++ {
+				asm.write("dec edi")
+				asm.write("add byte [edi], al")
+			}
+			asm.write("add edi, %d", t.Shift)
 		}
 	}
 
