@@ -1,5 +1,5 @@
 # bfg
-**A fast Brainfuck interpreter written in the Go programming language.**
+**A fast Brainfuck interpreter and compiler written in the Go programming language.**
 
 ---
 
@@ -9,7 +9,7 @@ Brainfuck is an esoteric programming language noted for its extreme minimalism. 
 
 ### Usage
 
-Brainfuck programs can be run by specifing the `-f` switch.
+Brainfuck programs can be specified by specifing the `-f` switch.
 
 ```
 bfg -f program.bf
