@@ -39,14 +39,14 @@ func TestLexingSingleOperators(t *testing.T) {
 	program := []byte("//this is a comment><+-foo,.[]bar")
 
 	tokens := []token.Token{
-		{Type: token.RightType, Shift: 1, Value: 1},
-		{Type: token.LeftType, Shift: 1, Value: 1},
-		{Type: token.AddType, Shift: 1, Value: 1},
-		{Type: token.SubType, Shift: 1, Value: 1},
-		{Type: token.InType, Shift: 1, Value: 1},
-		{Type: token.OutType, Shift: 1, Value: 1},
-		{Type: token.OpenType, Shift: 1, Value: 1, Jump: 7},
-		{Type: token.CloseType, Shift: 1, Value: 1, Jump: 6},
+		{Type: token.RightType, Move: 1, Value: 1},
+		{Type: token.LeftType, Move: 1, Value: 1},
+		{Type: token.AddType, Move: 1, Value: 1},
+		{Type: token.SubType, Move: 1, Value: 1},
+		{Type: token.InType, Move: 1, Value: 1},
+		{Type: token.OutType, Move: 1, Value: 1},
+		{Type: token.OpenType, Move: 1, Value: 1, Jump: 7},
+		{Type: token.CloseType, Move: 1, Value: 1, Jump: 6},
 		{Type: token.EOFType},
 	}
 
@@ -57,25 +57,25 @@ func TestLexingMultipleOperators(t *testing.T) {
 	program := []byte("++++++++>+++>>>>+++<+...---<<-<--,,,.")
 
 	tokens := []token.Token{
-		{Type: token.AddType, Shift: 8, Value: 8},
-		{Type: token.RightType, Shift: 1, Value: 1},
-		{Type: token.AddType, Shift: 3, Value: 3},
-		{Type: token.RightType, Shift: 4, Value: 4},
-		{Type: token.AddType, Shift: 3, Value: 3},
-		{Type: token.LeftType, Shift: 1, Value: 1},
-		{Type: token.AddType, Shift: 1, Value: 1},
-		{Type: token.OutType, Shift: 1, Value: 1},
-		{Type: token.OutType, Shift: 1, Value: 1},
-		{Type: token.OutType, Shift: 1, Value: 1},
-		{Type: token.SubType, Shift: 3, Value: 3},
-		{Type: token.LeftType, Shift: 2, Value: 2},
-		{Type: token.SubType, Shift: 1, Value: 1},
-		{Type: token.LeftType, Shift: 1, Value: 1},
-		{Type: token.SubType, Shift: 2, Value: 2},
-		{Type: token.InType, Shift: 1, Value: 1},
-		{Type: token.InType, Shift: 1, Value: 1},
-		{Type: token.InType, Shift: 1, Value: 1},
-		{Type: token.OutType, Shift: 1, Value: 1},
+		{Type: token.AddType, Move: 8, Value: 8},
+		{Type: token.RightType, Move: 1, Value: 1},
+		{Type: token.AddType, Move: 3, Value: 3},
+		{Type: token.RightType, Move: 4, Value: 4},
+		{Type: token.AddType, Move: 3, Value: 3},
+		{Type: token.LeftType, Move: 1, Value: 1},
+		{Type: token.AddType, Move: 1, Value: 1},
+		{Type: token.OutType, Move: 1, Value: 1},
+		{Type: token.OutType, Move: 1, Value: 1},
+		{Type: token.OutType, Move: 1, Value: 1},
+		{Type: token.SubType, Move: 3, Value: 3},
+		{Type: token.LeftType, Move: 2, Value: 2},
+		{Type: token.SubType, Move: 1, Value: 1},
+		{Type: token.LeftType, Move: 1, Value: 1},
+		{Type: token.SubType, Move: 2, Value: 2},
+		{Type: token.InType, Move: 1, Value: 1},
+		{Type: token.InType, Move: 1, Value: 1},
+		{Type: token.InType, Move: 1, Value: 1},
+		{Type: token.OutType, Move: 1, Value: 1},
 		{Type: token.EOFType},
 	}
 
@@ -86,12 +86,12 @@ func TestLexingZeroOptimisation(t *testing.T) {
 	program := []byte("++++++++++[-]++++++++++[-]+++++[->+<]")
 
 	tokens := []token.Token{
-		{Type: token.AddType, Shift: 10, Value: 10},
-		{Type: token.ZeroType, Shift: 3, Value: 3},
-		{Type: token.AddType, Shift: 10, Value: 10},
-		{Type: token.ZeroType, Shift: 3, Value: 3},
-		{Type: token.AddType, Shift: 5, Value: 5},
-		{Type: token.RightShiftAddType, Shift: 1},
+		{Type: token.AddType, Move: 10, Value: 10},
+		{Type: token.ZeroType, Move: 3, Value: 3},
+		{Type: token.AddType, Move: 10, Value: 10},
+		{Type: token.ZeroType, Move: 3, Value: 3},
+		{Type: token.AddType, Move: 5, Value: 5},
+		{Type: token.RightMoveAddType, Move: 1},
 		{Type: token.EOFType},
 	}
 
@@ -102,16 +102,16 @@ func TestLexingRightShiftAddLoopOptimisation(t *testing.T) {
 	program := []byte("++++++++++[->+<][->+<<][->>>+<<<][->>>>>+<<<<<]")
 
 	tokens := []token.Token{
-		{Type: token.AddType, Shift: 10, Value: 10},
-		{Type: token.RightShiftAddType, Shift: 1},
-		{Type: token.OpenType, Shift: 1, Value: 1, Jump: 7},
-		{Type: token.SubType, Shift: 1, Value: 1},
-		{Type: token.RightType, Shift: 1, Value: 1},
-		{Type: token.AddType, Shift: 1, Value: 1},
-		{Type: token.LeftType, Shift: 2, Value: 2},
-		{Type: token.CloseType, Shift: 1, Value: 1, Jump: 2},
-		{Type: token.RightShiftAddType, Shift: 3},
-		{Type: token.RightShiftAddType, Shift: 5},
+		{Type: token.AddType, Move: 10, Value: 10},
+		{Type: token.RightMoveAddType, Move: 1},
+		{Type: token.OpenType, Move: 1, Value: 1, Jump: 7},
+		{Type: token.SubType, Move: 1, Value: 1},
+		{Type: token.RightType, Move: 1, Value: 1},
+		{Type: token.AddType, Move: 1, Value: 1},
+		{Type: token.LeftType, Move: 2, Value: 2},
+		{Type: token.CloseType, Move: 1, Value: 1, Jump: 2},
+		{Type: token.RightMoveAddType, Move: 3},
+		{Type: token.RightMoveAddType, Move: 5},
 		{Type: token.EOFType},
 	}
 
@@ -122,16 +122,16 @@ func TestLexingLeftShiftAddLoopOptimisation(t *testing.T) {
 	program := []byte("++++++++++[-<+>][-<<<<<+>>>>>][-<+>>][-<<<+>>>]")
 
 	tokens := []token.Token{
-		{Type: token.AddType, Shift: 10, Value: 10},
-		{Type: token.LeftShiftAddType, Shift: 1},
-		{Type: token.LeftShiftAddType, Shift: 5},
-		{Type: token.OpenType, Shift: 1, Value: 1, Jump: 8},
-		{Type: token.SubType, Shift: 1, Value: 1},
-		{Type: token.LeftType, Shift: 1, Value: 1},
-		{Type: token.AddType, Shift: 1, Value: 1},
-		{Type: token.RightType, Shift: 2, Value: 2},
-		{Type: token.CloseType, Shift: 1, Value: 1, Jump: 3},
-		{Type: token.LeftShiftAddType, Shift: 3},
+		{Type: token.AddType, Move: 10, Value: 10},
+		{Type: token.LeftMoveAddType, Move: 1},
+		{Type: token.LeftMoveAddType, Move: 5},
+		{Type: token.OpenType, Move: 1, Value: 1, Jump: 8},
+		{Type: token.SubType, Move: 1, Value: 1},
+		{Type: token.LeftType, Move: 1, Value: 1},
+		{Type: token.AddType, Move: 1, Value: 1},
+		{Type: token.RightType, Move: 2, Value: 2},
+		{Type: token.CloseType, Move: 1, Value: 1, Jump: 3},
+		{Type: token.LeftMoveAddType, Move: 3},
 		{Type: token.EOFType},
 	}
 
@@ -142,10 +142,10 @@ func TestLexingRightLinearAddLoopOptimisation(t *testing.T) {
 	program := []byte("++++++++++[->+<][->+>+>+<<<][->+>+>+>+>+<<<<<]")
 
 	tokens := []token.Token{
-		{Type: token.AddType, Shift: 10, Value: 10},
-		{Type: token.RightShiftAddType, Shift: 1},
-		{Type: token.RightLinearAddType, Shift: 3},
-		{Type: token.RightLinearAddType, Shift: 5},
+		{Type: token.AddType, Move: 10, Value: 10},
+		{Type: token.RightMoveAddType, Move: 1},
+		{Type: token.RightLinearAddType, Move: 3},
+		{Type: token.RightLinearAddType, Move: 5},
 		{Type: token.EOFType},
 	}
 
@@ -156,10 +156,10 @@ func TestLexingLeftLinearAddLoopOptimisation(t *testing.T) {
 	program := []byte("++++++++++[-<+>][-<+<+<+>>>][-<+<+<+<+<+>>>>>]")
 
 	tokens := []token.Token{
-		{Type: token.AddType, Shift: 10, Value: 10},
-		{Type: token.LeftShiftAddType, Shift: 1},
-		{Type: token.LeftLinearAddType, Shift: 3},
-		{Type: token.LeftLinearAddType, Shift: 5},
+		{Type: token.AddType, Move: 10, Value: 10},
+		{Type: token.LeftMoveAddType, Move: 1},
+		{Type: token.LeftLinearAddType, Move: 3},
+		{Type: token.LeftLinearAddType, Move: 5},
 		{Type: token.EOFType},
 	}
 
@@ -171,7 +171,7 @@ func assertTokens(t *testing.T, program []byte, tokens []token.Token) {
 
 	for x := 0; x < len(tokens); x++ {
 		typeMismatch := output[x].Type != tokens[x].Type
-		shiftMismatch := output[x].Shift != tokens[x].Shift
+		shiftMismatch := output[x].Move != tokens[x].Move
 		valueMismatch := output[x].Value != tokens[x].Value
 		jumpMismatch := output[x].Jump != tokens[x].Jump
 

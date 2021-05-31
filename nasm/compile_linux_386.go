@@ -25,10 +25,10 @@ func newAssembly(tokens []token.Token) nasm {
 		switch t.Type {
 
 		case token.RightType:
-			asm.write("add edi, %d", t.Shift)
+			asm.write("add edi, %d", t.Move)
 
 		case token.LeftType:
-			asm.write("sub edi, %d", t.Shift)
+			asm.write("sub edi, %d", t.Move)
 
 		case token.AddType:
 			asm.write("add byte [edi], %d", t.Value)
@@ -63,26 +63,26 @@ func newAssembly(tokens []token.Token) nasm {
 		case token.ZeroType:
 			asm.write("mov byte [edi], 0")
 
-		case token.RightShiftAddType:
+		case token.RightMoveAddType:
 			asm.write("cmp byte [edi], 0")
 			asm.write("je close_loop_%d", i)
 			asm.write("open_loop_%d:", i)
 			asm.write("mov byte al, [edi]")
 			asm.write("mov byte [edi], 0")
-			asm.write("add edi, %d", t.Shift)
+			asm.write("add edi, %d", t.Move)
 			asm.write("add byte [edi], al")
-			asm.write("sub edi, %d", t.Shift)
+			asm.write("sub edi, %d", t.Move)
 			asm.write("close_loop_%d:", i)
 
-		case token.LeftShiftAddType:
+		case token.LeftMoveAddType:
 			asm.write("cmp byte [edi], 0")
 			asm.write("je close_loop_%d", i)
 			asm.write("open_loop_%d:", i)
 			asm.write("mov byte al, [edi]")
 			asm.write("mov byte [edi], 0")
-			asm.write("sub edi, %d", t.Shift)
+			asm.write("sub edi, %d", t.Move)
 			asm.write("add byte [edi], al")
-			asm.write("add edi, %d", t.Shift)
+			asm.write("add edi, %d", t.Move)
 			asm.write("close_loop_%d:", i)
 
 		case token.RightLinearAddType:
@@ -91,11 +91,11 @@ func newAssembly(tokens []token.Token) nasm {
 			asm.write("open_loop_%d:", i)
 			asm.write("mov byte al, [edi]")
 			asm.write("mov byte [edi], 0")
-			for i := 1; i <= t.Shift; i++ {
+			for i := 1; i <= t.Move; i++ {
 				asm.write("inc edi")
 				asm.write("add byte [edi], al")
 			}
-			asm.write("sub edi, %d", t.Shift)
+			asm.write("sub edi, %d", t.Move)
 			asm.write("close_loop_%d:", i)
 
 		case token.LeftLinearAddType:
@@ -104,11 +104,11 @@ func newAssembly(tokens []token.Token) nasm {
 			asm.write("open_loop_%d:", i)
 			asm.write("mov byte al, [edi]")
 			asm.write("mov byte [edi], 0")
-			for i := 1; i <= t.Shift; i++ {
+			for i := 1; i <= t.Move; i++ {
 				asm.write("dec edi")
 				asm.write("add byte [edi], al")
 			}
-			asm.write("add edi, %d", t.Shift)
+			asm.write("add edi, %d", t.Move)
 			asm.write("close_loop_%d:", i)
 		}
 	}

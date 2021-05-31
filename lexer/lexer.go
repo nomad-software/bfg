@@ -42,7 +42,7 @@ func (l *Lexer) unread() []byte {
 func (l *Lexer) emit(t token.LexemeType) {
 	tok := token.Token{
 		Type:  t,
-		Shift: len(l.read()),
+		Move:  len(l.read()),
 		Value: byte(len(l.read())),
 	}
 
@@ -56,42 +56,42 @@ func (l *Lexer) emit(t token.LexemeType) {
 		l.Tokens[tok.Jump].Jump = len(l.Tokens)
 	}
 
-	if t == token.RightShiftAddType {
-		tok.Shift = 0
+	if t == token.RightMoveAddType {
+		tok.Move = 0
 		tok.Value = 0
 		for _, b := range l.read() {
 			if b == token.Right {
-				tok.Shift++
+				tok.Move++
 			}
 		}
 	}
 
-	if t == token.LeftShiftAddType {
-		tok.Shift = 0
+	if t == token.LeftMoveAddType {
+		tok.Move = 0
 		tok.Value = 0
 		for _, b := range l.read() {
 			if b == token.Left {
-				tok.Shift++
+				tok.Move++
 			}
 		}
 	}
 
 	if t == token.RightLinearAddType {
-		tok.Shift = 0
+		tok.Move = 0
 		tok.Value = 0
 		for _, b := range l.read() {
 			if b == token.Right {
-				tok.Shift++
+				tok.Move++
 			}
 		}
 	}
 
 	if t == token.LeftLinearAddType {
-		tok.Shift = 0
+		tok.Move = 0
 		tok.Value = 0
 		for _, b := range l.read() {
 			if b == token.Left {
-				tok.Shift++
+				tok.Move++
 			}
 		}
 	}
@@ -247,7 +247,7 @@ func lexRightShiftAddLoop(l *Lexer) stateFn {
 
 			if rightShift > 0 && rightShift == leftShift && l.peek() == token.Close {
 				l.advance()
-				l.emit(token.RightShiftAddType)
+				l.emit(token.RightMoveAddType)
 				return lex
 			}
 		}
@@ -287,7 +287,7 @@ func lexLeftShiftAddLoop(l *Lexer) stateFn {
 
 			if leftShift > 0 && rightShift == leftShift && l.peek() == token.Close {
 				l.advance()
-				l.emit(token.LeftShiftAddType)
+				l.emit(token.LeftMoveAddType)
 				return lex
 			}
 		}
