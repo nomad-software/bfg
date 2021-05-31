@@ -41,22 +41,18 @@ func (l *Lexer) unread() []byte {
 
 func (l *Lexer) emit(t token.LexemeType) {
 	tok := token.Token{
-		Type:  t,
-		Move:  len(l.read()),
-		Value: byte(len(l.read())),
+		Type: t,
 	}
 
 	if t == token.OpenType {
 		l.loops = append(l.loops, len(l.Tokens))
-	}
 
-	if t == token.CloseType {
+	} else if t == token.CloseType {
 		tok.Jump = l.loops[len(l.loops)-1]
 		l.loops = l.loops[:len(l.loops)-1]
 		l.Tokens[tok.Jump].Jump = len(l.Tokens)
-	}
 
-	if t == token.RightMoveAddType {
+	} else if t == token.RightMoveAddType {
 		tok.Move = 0
 		tok.Value = 0
 		for _, b := range l.read() {
@@ -64,9 +60,8 @@ func (l *Lexer) emit(t token.LexemeType) {
 				tok.Move++
 			}
 		}
-	}
 
-	if t == token.LeftMoveAddType {
+	} else if t == token.LeftMoveAddType {
 		tok.Move = 0
 		tok.Value = 0
 		for _, b := range l.read() {
@@ -74,9 +69,8 @@ func (l *Lexer) emit(t token.LexemeType) {
 				tok.Move++
 			}
 		}
-	}
 
-	if t == token.RightLinearAddType {
+	} else if t == token.RightLinearAddType {
 		tok.Move = 0
 		tok.Value = 0
 		for _, b := range l.read() {
@@ -84,9 +78,8 @@ func (l *Lexer) emit(t token.LexemeType) {
 				tok.Move++
 			}
 		}
-	}
 
-	if t == token.LeftLinearAddType {
+	} else if t == token.LeftLinearAddType {
 		tok.Move = 0
 		tok.Value = 0
 		for _, b := range l.read() {
@@ -94,6 +87,10 @@ func (l *Lexer) emit(t token.LexemeType) {
 				tok.Move++
 			}
 		}
+
+	} else {
+		tok.Move = len(l.read())
+		tok.Value = byte(len(l.read()))
 	}
 
 	l.Tokens = append(l.Tokens, tok)
