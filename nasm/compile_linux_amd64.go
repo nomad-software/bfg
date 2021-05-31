@@ -64,13 +64,31 @@ func newAssembly(tokens []token.Token) nasm {
 			asm.write("mov byte [r8], 0")
 
 		case token.RightShiftAddType:
+			asm.write("cmp byte [r8], 0")
+			asm.write("je close_loop_%d", i)
+			asm.write("open_loop_%d:", i)
 			asm.write("mov byte al, [r8]")
 			asm.write("mov byte [r8], 0")
 			asm.write("add r8, %d", t.Shift)
 			asm.write("add byte [r8], al")
 			asm.write("sub r8, %d", t.Shift)
+			asm.write("close_loop_%d:", i)
+
+		case token.LeftShiftAddType:
+			asm.write("cmp byte [r8], 0")
+			asm.write("je close_loop_%d", i)
+			asm.write("open_loop_%d:", i)
+			asm.write("mov byte al, [r8]")
+			asm.write("mov byte [r8], 0")
+			asm.write("sub r8, %d", t.Shift)
+			asm.write("add byte [r8], al")
+			asm.write("add r8, %d", t.Shift)
+			asm.write("close_loop_%d:", i)
 
 		case token.RightLinearAddType:
+			asm.write("cmp byte [r8], 0")
+			asm.write("je close_loop_%d", i)
+			asm.write("open_loop_%d:", i)
 			asm.write("mov byte al, [r8]")
 			asm.write("mov byte [r8], 0")
 			for i := 1; i <= t.Shift; i++ {
@@ -78,8 +96,12 @@ func newAssembly(tokens []token.Token) nasm {
 				asm.write("add byte [r8], al")
 			}
 			asm.write("sub r8, %d", t.Shift)
+			asm.write("close_loop_%d:", i)
 
 		case token.LeftLinearAddType:
+			asm.write("cmp byte [r8], 0")
+			asm.write("je close_loop_%d", i)
+			asm.write("open_loop_%d:", i)
 			asm.write("mov byte al, [r8]")
 			asm.write("mov byte [r8], 0")
 			for i := 1; i <= t.Shift; i++ {
@@ -87,6 +109,7 @@ func newAssembly(tokens []token.Token) nasm {
 				asm.write("add byte [r8], al")
 			}
 			asm.write("add r8, %d", t.Shift)
+			asm.write("close_loop_%d:", i)
 		}
 	}
 

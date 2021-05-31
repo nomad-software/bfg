@@ -374,10 +374,10 @@ func lexOpen(l *Lexer) stateFn {
 	if s != nil {
 		return s
 	}
-	// s = lexLeftShiftAddLoop(l)
-	// if s != nil {
-	// 	return s
-	// }
+	s = lexLeftShiftAddLoop(l)
+	if s != nil {
+		return s
+	}
 	s = lexRightLinearAddLoop(l)
 	if s != nil {
 		return s

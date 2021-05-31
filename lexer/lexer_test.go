@@ -118,25 +118,25 @@ func TestLexingRightShiftAddLoopOptimisation(t *testing.T) {
 	assertTokens(t, program, tokens)
 }
 
-// func TestLexingLeftShiftAddLoopOptimisation(t *testing.T) {
-// 	program := []byte("++++++++++[-<+>][-<<<<<+>>>>>][-<+>>][-<<<+>>>]")
+func TestLexingLeftShiftAddLoopOptimisation(t *testing.T) {
+	program := []byte("++++++++++[-<+>][-<<<<<+>>>>>][-<+>>][-<<<+>>>]")
 
-// 	tokens := []token.Token{
-// 		{Type: token.AddType, Shift: 10, Value: 10},
-// 		{Type: token.LeftShiftAddType, Shift: 1},
-// 		{Type: token.LeftShiftAddType, Shift: 5},
-// 		{Type: token.OpenType, Shift: 1, Value: 1, Jump: 8},
-// 		{Type: token.SubType, Shift: 1, Value: 1},
-// 		{Type: token.LeftType, Shift: 1, Value: 1},
-// 		{Type: token.AddType, Shift: 1, Value: 1},
-// 		{Type: token.RightType, Shift: 2, Value: 2},
-// 		{Type: token.CloseType, Shift: 1, Value: 1, Jump: 3},
-// 		{Type: token.LeftShiftAddType, Shift: 3},
-// 		{Type: token.EOFType},
-// 	}
+	tokens := []token.Token{
+		{Type: token.AddType, Shift: 10, Value: 10},
+		{Type: token.LeftShiftAddType, Shift: 1},
+		{Type: token.LeftShiftAddType, Shift: 5},
+		{Type: token.OpenType, Shift: 1, Value: 1, Jump: 8},
+		{Type: token.SubType, Shift: 1, Value: 1},
+		{Type: token.LeftType, Shift: 1, Value: 1},
+		{Type: token.AddType, Shift: 1, Value: 1},
+		{Type: token.RightType, Shift: 2, Value: 2},
+		{Type: token.CloseType, Shift: 1, Value: 1, Jump: 3},
+		{Type: token.LeftShiftAddType, Shift: 3},
+		{Type: token.EOFType},
+	}
 
-// 	assertTokens(t, program, tokens)
-// }
+	assertTokens(t, program, tokens)
+}
 
 func TestLexingRightLinearAddLoopOptimisation(t *testing.T) {
 	program := []byte("++++++++++[->+<][->+>+>+<<<][->+>+>+>+>+<<<<<]")
@@ -157,7 +157,7 @@ func TestLexingLeftLinearAddLoopOptimisation(t *testing.T) {
 
 	tokens := []token.Token{
 		{Type: token.AddType, Shift: 10, Value: 10},
-		{Type: token.LeftLinearAddType, Shift: 1},
+		{Type: token.LeftShiftAddType, Shift: 1},
 		{Type: token.LeftLinearAddType, Shift: 3},
 		{Type: token.LeftLinearAddType, Shift: 5},
 		{Type: token.EOFType},
