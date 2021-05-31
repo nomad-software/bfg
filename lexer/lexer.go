@@ -214,35 +214,35 @@ func lexZeroLoop(l *Lexer) stateFn {
 	return nil
 }
 
-func lexRightShiftAddLoop(l *Lexer) stateFn {
+func lexRightMoveAddLoop(l *Lexer) stateFn {
 	pos := l.end
-	rightShift := 0
-	leftShift := 0
+	rightMove := 0
+	leftMove := 0
 	if l.peek() == token.Sub {
 		l.advance()
 
 		for {
 			if l.peek() == token.Right {
 				l.advance()
-				rightShift++
+				rightMove++
 			} else {
 				break
 			}
 		}
 
-		if rightShift > 0 && l.peek() == token.Add {
+		if rightMove > 0 && l.peek() == token.Add {
 			l.advance()
 
 			for {
 				if l.peek() == token.Left {
 					l.advance()
-					leftShift++
+					leftMove++
 				} else {
 					break
 				}
 			}
 
-			if rightShift > 0 && rightShift == leftShift && l.peek() == token.Close {
+			if rightMove > 0 && rightMove == leftMove && l.peek() == token.Close {
 				l.advance()
 				l.emit(token.RightMoveAddType)
 				return lex
@@ -254,35 +254,35 @@ func lexRightShiftAddLoop(l *Lexer) stateFn {
 	return nil
 }
 
-func lexLeftShiftAddLoop(l *Lexer) stateFn {
+func lexLeftMoveAddLoop(l *Lexer) stateFn {
 	pos := l.end
-	rightShift := 0
-	leftShift := 0
+	rightMove := 0
+	leftMove := 0
 	if l.peek() == token.Sub {
 		l.advance()
 
 		for {
 			if l.peek() == token.Left {
 				l.advance()
-				leftShift++
+				leftMove++
 			} else {
 				break
 			}
 		}
 
-		if leftShift > 0 && l.peek() == token.Add {
+		if leftMove > 0 && l.peek() == token.Add {
 			l.advance()
 
 			for {
 				if l.peek() == token.Right {
 					l.advance()
-					rightShift++
+					rightMove++
 				} else {
 					break
 				}
 			}
 
-			if leftShift > 0 && rightShift == leftShift && l.peek() == token.Close {
+			if leftMove > 0 && rightMove == leftMove && l.peek() == token.Close {
 				l.advance()
 				l.emit(token.LeftMoveAddType)
 				return lex
@@ -296,8 +296,8 @@ func lexLeftShiftAddLoop(l *Lexer) stateFn {
 
 func lexRightLinearAddLoop(l *Lexer) stateFn {
 	pos := l.end
-	rightShift := 0
-	leftShift := 0
+	rightMove := 0
+	leftMove := 0
 	if l.peek() == token.Sub {
 		l.advance()
 
@@ -307,14 +307,14 @@ func lexRightLinearAddLoop(l *Lexer) stateFn {
 				l.advance()
 				if l.peek() == token.Add {
 					l.advance()
-					rightShift++
+					rightMove++
 				} else {
 					break exit
 				}
-			} else if rightShift > 0 && l.peek() == token.Left {
+			} else if rightMove > 0 && l.peek() == token.Left {
 				l.advance()
-				leftShift++
-			} else if rightShift > 0 && rightShift == leftShift && l.peek() == token.Close {
+				leftMove++
+			} else if rightMove > 0 && rightMove == leftMove && l.peek() == token.Close {
 				l.advance()
 				l.emit(token.RightLinearAddType)
 				return lex
@@ -330,8 +330,8 @@ func lexRightLinearAddLoop(l *Lexer) stateFn {
 
 func lexLeftLinearAddLoop(l *Lexer) stateFn {
 	pos := l.end
-	rightShift := 0
-	leftShift := 0
+	rightMove := 0
+	leftMove := 0
 	if l.peek() == token.Sub {
 		l.advance()
 
@@ -341,14 +341,14 @@ func lexLeftLinearAddLoop(l *Lexer) stateFn {
 				l.advance()
 				if l.peek() == token.Add {
 					l.advance()
-					leftShift++
+					leftMove++
 				} else {
 					break exit
 				}
-			} else if leftShift > 0 && l.peek() == token.Right {
+			} else if leftMove > 0 && l.peek() == token.Right {
 				l.advance()
-				rightShift++
-			} else if leftShift > 0 && rightShift == leftShift && l.peek() == token.Close {
+				rightMove++
+			} else if leftMove > 0 && rightMove == leftMove && l.peek() == token.Close {
 				l.advance()
 				l.emit(token.LeftLinearAddType)
 				return lex
@@ -367,11 +367,11 @@ func lexOpen(l *Lexer) stateFn {
 	if s != nil {
 		return s
 	}
-	s = lexRightShiftAddLoop(l)
+	s = lexRightMoveAddLoop(l)
 	if s != nil {
 		return s
 	}
-	s = lexLeftShiftAddLoop(l)
+	s = lexLeftMoveAddLoop(l)
 	if s != nil {
 		return s
 	}

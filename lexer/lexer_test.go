@@ -98,7 +98,7 @@ func TestLexingZeroOptimisation(t *testing.T) {
 	assertTokens(t, program, tokens)
 }
 
-func TestLexingRightShiftAddLoopOptimisation(t *testing.T) {
+func TestLexingRightMoveAddLoopOptimisation(t *testing.T) {
 	program := []byte("++++++++++[->+<][->+<<][->>>+<<<][->>>>>+<<<<<]")
 
 	tokens := []token.Token{
@@ -118,7 +118,7 @@ func TestLexingRightShiftAddLoopOptimisation(t *testing.T) {
 	assertTokens(t, program, tokens)
 }
 
-func TestLexingLeftShiftAddLoopOptimisation(t *testing.T) {
+func TestLexingLeftMoveAddLoopOptimisation(t *testing.T) {
 	program := []byte("++++++++++[-<+>][-<<<<<+>>>>>][-<+>>][-<<<+>>>]")
 
 	tokens := []token.Token{
@@ -171,11 +171,11 @@ func assertTokens(t *testing.T, program []byte, tokens []token.Token) {
 
 	for x := 0; x < len(tokens); x++ {
 		typeMismatch := output[x].Type != tokens[x].Type
-		shiftMismatch := output[x].Move != tokens[x].Move
+		moveMismatch := output[x].Move != tokens[x].Move
 		valueMismatch := output[x].Value != tokens[x].Value
 		jumpMismatch := output[x].Jump != tokens[x].Jump
 
-		if typeMismatch || shiftMismatch || valueMismatch || jumpMismatch {
+		if typeMismatch || moveMismatch || valueMismatch || jumpMismatch {
 			t.Errorf("Expected: %#v", tokens[x])
 			t.Fatalf("Actual  : %#v", output[x])
 		}
