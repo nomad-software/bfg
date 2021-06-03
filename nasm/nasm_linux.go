@@ -2,7 +2,6 @@ package nasm
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -22,7 +21,7 @@ func (a *nasm) write(format string, args ...interface{}) {
 
 func (a *nasm) writeFile(name string) {
 	a.file = name
-	err := ioutil.WriteFile(a.file, []byte(a.src.String()), 0666)
+	err := os.WriteFile(a.file, []byte(a.src.String()), 0666)
 
 	if err != nil {
 		fmt.Printf("Can't write assembly file (%s). %s\n", a.file, err.Error())
