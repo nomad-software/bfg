@@ -32,6 +32,6 @@ func BenchmarkEvaluator(b *testing.B) {
 	b.ResetTimer()
 
 	for x := 0; x < b.N; x++ {
-		Evaluate(tokens, *input, *output)
+		Evaluate(tokens, input, output)
 	}
 }

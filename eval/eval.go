@@ -11,7 +11,7 @@ const (
 )
 
 // Evaluate evaluates the program and executes it.
-func Evaluate(tokens []token.Token, input bufio.Reader, output bufio.Writer) {
+func Evaluate(tokens []token.Token, input *bufio.Reader, output *bufio.Writer) {
 
 	var stack [stackSize]byte
 	ptr := 0

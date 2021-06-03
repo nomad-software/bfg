@@ -33,5 +33,5 @@ func main() {
 	output := bufio.NewWriter(os.Stdout)
 	defer output.Flush()
 
-	eval.Evaluate(tokens, *input, *output)
+	eval.Evaluate(tokens, input, output)
 }

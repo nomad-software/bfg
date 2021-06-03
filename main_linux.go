@@ -32,7 +32,7 @@ func main() {
 		input := bufio.NewReader(os.Stdin)
 		output := bufio.NewWriter(os.Stdout)
 		defer output.Flush()
-		eval.Evaluate(tokens, *input, *output)
+		eval.Evaluate(tokens, input, output)
 
 	} else {
 		nasm.Compile(tokens, opt.Exe)
