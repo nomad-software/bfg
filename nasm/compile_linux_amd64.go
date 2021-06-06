@@ -118,7 +118,7 @@ func newAssembly(tokens []token.Token) nasm {
 	asm.write("syscall")
 
 	asm.write("section .bss")
-	asm.write("stack: resb 131072")
+	asm.write("stack: resb 131072") // 128K
 
 	return asm
 }

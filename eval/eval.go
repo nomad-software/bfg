@@ -7,7 +7,7 @@ import (
 )
 
 const (
-	stackSize = 1 << 16
+	stackSize = 131072 // 128K
 )
 
 // Evaluate evaluates the program and executes it.
