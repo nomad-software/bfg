@@ -1,7 +1,6 @@
 package lexer
 
 import (
-	"io/ioutil"
 	"log"
 	"os"
 	"path"
@@ -18,7 +17,7 @@ func BenchmarkLexer(b *testing.B) {
 		log.Fatalln(err)
 	}
 
-	program, err := ioutil.ReadFile(path.Join(wd, "../programs/mandelbrot.bf"))
+	program, err := os.ReadFile(path.Join(wd, "../programs/mandelbrot.bf"))
 	if err != nil {
 		log.Fatalln(err)
 	}

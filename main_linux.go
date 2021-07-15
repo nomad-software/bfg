@@ -3,7 +3,6 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"io/ioutil"
 	"os"
 
 	"github.com/nomad-software/bfg/cli"
@@ -20,7 +19,7 @@ func main() {
 		opt.PrintUsage()
 	}
 
-	program, err := ioutil.ReadFile(opt.File)
+	program, err := os.ReadFile(opt.File)
 	if err != nil {
 		fmt.Printf("Can't read program file. %s\n", err.Error())
 		os.Exit(1)

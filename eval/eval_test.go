@@ -2,7 +2,7 @@ package eval
 
 import (
 	"bufio"
-	"io/ioutil"
+	"io"
 	"log"
 	"os"
 	"path"
@@ -17,13 +17,13 @@ func BenchmarkEvaluator(b *testing.B) {
 		log.Fatalln(err)
 	}
 
-	program, err := ioutil.ReadFile(path.Join(wd, "../programs/mandelbrot.bf"))
+	program, err := os.ReadFile(path.Join(wd, "../programs/mandelbrot.bf"))
 	if err != nil {
 		log.Fatalln(err)
 	}
 
 	input := bufio.NewReader(os.Stdin)
-	output := bufio.NewWriter(ioutil.Discard)
+	output := bufio.NewWriter(io.Discard)
 	defer output.Flush()
 
 	tokens := lexer.New(program).Tokens
