@@ -81,6 +81,11 @@ func Evaluate(tokens []token.Token, input *bufio.Reader, output *bufio.Writer) {
 				stack[ptr] = 0
 			}
 
+		case token.MultiplyAddType:
+			if stack[ptr] != 0 {
+				stack[ptr+tokens[x].Move] += (stack[ptr] * tokens[x].Value)
+			}
+
 		case token.EOFType:
 			output.Flush()
 		}

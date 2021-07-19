@@ -37,6 +37,7 @@ const (
 	LeftMoveAddType
 	RightLinearAddType
 	LeftLinearAddType
+	MultiplyAddType
 )
 
 // Token represents a unit of output from the lexer.

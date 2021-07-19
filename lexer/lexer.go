@@ -90,11 +90,49 @@ func (l *Lexer) emit(t token.LexemeType) {
 
 	} else {
 		tok.Move = len(l.read())
-		tok.Value = byte(len(l.read()))
+		tok.Value = byte(tok.Move)
 	}
 
 	l.Tokens = append(l.Tokens, tok)
 	l.start = l.end
+}
+
+func (l *Lexer) emitMultiplyLoop() {
+	// Disregard the [loop] open and sub operators otherwise we'll read the
+	// beginning sub operator as part of the value.
+	l.start = l.start + 2
+	var offset int = 0
+	var value byte = 0
+	for _, b := range l.read() {
+		if b == token.Right {
+			if value != 0 {
+				tok := token.Token{
+					Type:  token.MultiplyAddType,
+					Move:  offset,
+					Value: value,
+				}
+				l.Tokens = append(l.Tokens, tok)
+			}
+			offset++
+			value = 0
+		} else if b == token.Left {
+			if value != 0 {
+				tok := token.Token{
+					Type:  token.MultiplyAddType,
+					Move:  offset,
+					Value: value,
+				}
+				l.Tokens = append(l.Tokens, tok)
+			}
+			offset--
+			value = 0
+		} else if b == token.Add {
+			value++
+		} else if b == token.Sub {
+			value--
+		}
+	}
+	l.emit(token.ZeroType)
 }
 
 func (l *Lexer) peek() byte {
@@ -211,6 +249,46 @@ func lexZeroLoop(l *Lexer) stateFn {
 		}
 		l.retreat(1)
 	}
+	return nil
+}
+
+func lexMultiplyLoop(l *Lexer) stateFn {
+	pos := l.end
+	rightMove := 0
+	leftMove := 0
+	add := 0
+	sub := 0
+	if l.peek() == token.Sub {
+		l.advance()
+		for {
+			if l.peek() == token.Right {
+				rightMove++
+				l.advance()
+			} else if l.peek() == token.Left {
+				leftMove++
+				l.advance()
+			} else if l.peek() == token.Add {
+				add++
+				l.advance()
+			} else if l.peek() == token.Sub {
+				sub++
+				l.advance()
+			} else if l.peek() == token.Close {
+				l.advance()
+				if (rightMove > 0 || leftMove > 0) && (rightMove == leftMove) {
+					if add > 0 || sub > 0 {
+						l.emitMultiplyLoop()
+						return lex
+					}
+					break
+				}
+			} else {
+				break
+			}
+		}
+	}
+
+	l.retreat(l.end - pos)
 	return nil
 }
 
@@ -362,6 +440,9 @@ func lexLeftLinearAddLoop(l *Lexer) stateFn {
 	return nil
 }
 
+// LexOpen lexes not only the [loop] open operator but tries to be clever and
+// completely replaces loops with optimised lexemes if the input is of a known
+// optimisation. As more loop optimisations are found they will be added here.
 func lexOpen(l *Lexer) stateFn {
 	s := lexZeroLoop(l)
 	if s != nil {
@@ -380,6 +461,10 @@ func lexOpen(l *Lexer) stateFn {
 		return s
 	}
 	s = lexLeftLinearAddLoop(l)
+	if s != nil {
+		return s
+	}
+	s = lexMultiplyLoop(l)
 	if s != nil {
 		return s
 	}
