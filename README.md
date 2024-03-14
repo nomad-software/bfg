@@ -15,10 +15,8 @@ Brainfuck programs can be specified by specifing the `-f` switch.
 bfg -f program.bf
 ```
 
-### Linux
-
-On linux a platform specific compiler is used by default. This means brainfuck code is executed up to five times faster than other platforms. To revert to use the cross-platform interpreter, pass the `-i` switch.
+See help for more information about the included compilers and evaluator.
 
 ```
-bfg -i -f program.bf
+bfg -help
 ```
