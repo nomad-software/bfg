@@ -8,7 +8,7 @@ import (
 	"github.com/nomad-software/bfg/cli"
 	"github.com/nomad-software/bfg/compiler/golang"
 	"github.com/nomad-software/bfg/compiler/nasm"
-	"github.com/nomad-software/bfg/interpreter/eval"
+	"github.com/nomad-software/bfg/evaluator"
 	"github.com/nomad-software/bfg/lexer"
 )
 
@@ -33,7 +33,7 @@ func main() {
 		input := bufio.NewReader(os.Stdin)
 		output := bufio.NewWriter(os.Stdout)
 		defer output.Flush()
-		eval.Evaluate(tokens, input, output)
+		evaluator.Evaluate(tokens, input, output)
 
 	} else if opt.Nasm {
 		nasm.Compile(tokens)

@@ -1,4 +1,4 @@
-package eval
+package evaluator
 
 import (
 	"bufio"
@@ -17,7 +17,7 @@ func BenchmarkMandelbrot(b *testing.B) {
 		log.Fatalln(err)
 	}
 
-	program, err := os.ReadFile(path.Join(wd, "../../programs/mandelbrot.bf"))
+	program, err := os.ReadFile(path.Join(wd, "../programs/mandelbrot.bf"))
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -42,7 +42,7 @@ func BenchmarkHanoi(b *testing.B) {
 		log.Fatalln(err)
 	}
 
-	program, err := os.ReadFile(path.Join(wd, "../../programs/hanoi.bf"))
+	program, err := os.ReadFile(path.Join(wd, "../programs/hanoi.bf"))
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -67,7 +67,7 @@ func BenchmarkLong(b *testing.B) {
 		log.Fatalln(err)
 	}
 
-	program, err := os.ReadFile(path.Join(wd, "../../programs/long.bf"))
+	program, err := os.ReadFile(path.Join(wd, "../programs/long.bf"))
 	if err != nil {
 		log.Fatalln(err)
 	}
