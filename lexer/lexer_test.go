@@ -90,75 +90,12 @@ func TestLexingZeroOptimisation(t *testing.T) {
 		{Type: token.AddType, Move: 10, Value: 10},
 		{Type: token.ZeroType, Move: 3, Value: 3},
 		{Type: token.AddType, Move: 5, Value: 5},
-		{Type: token.RightMoveAddType, Move: 1},
-		{Type: token.EOFType},
-	}
-
-	assertTokens(t, program, tokens)
-}
-
-func TestLexingRightMoveAddLoopOptimisation(t *testing.T) {
-	program := []byte("++++++++++[->+<][->+<<][->>>+<<<][->>>>>+<<<<<]")
-
-	tokens := []token.Token{
-		{Type: token.AddType, Move: 10, Value: 10},
-		{Type: token.RightMoveAddType, Move: 1},
-		{Type: token.OpenType, Move: 0, Value: 0, Jump: 7},
+		{Type: token.OpenType, Move: 0, Jump: 10},
 		{Type: token.SubType, Move: 1, Value: 1},
 		{Type: token.RightType, Move: 1, Value: 1},
 		{Type: token.AddType, Move: 1, Value: 1},
-		{Type: token.LeftType, Move: 2, Value: 2},
-		{Type: token.CloseType, Move: 0, Value: 0, Jump: 2},
-		{Type: token.RightMoveAddType, Move: 3},
-		{Type: token.RightMoveAddType, Move: 5},
-		{Type: token.EOFType},
-	}
-
-	assertTokens(t, program, tokens)
-}
-
-func TestLexingLeftMoveAddLoopOptimisation(t *testing.T) {
-	program := []byte("++++++++++[-<+>][-<<<<<+>>>>>][-<+>>][-<<<+>>>]")
-
-	tokens := []token.Token{
-		{Type: token.AddType, Move: 10, Value: 10},
-		{Type: token.LeftMoveAddType, Move: 1},
-		{Type: token.LeftMoveAddType, Move: 5},
-		{Type: token.OpenType, Move: 0, Value: 0, Jump: 8},
-		{Type: token.SubType, Move: 1, Value: 1},
 		{Type: token.LeftType, Move: 1, Value: 1},
-		{Type: token.AddType, Move: 1, Value: 1},
-		{Type: token.RightType, Move: 2, Value: 2},
-		{Type: token.CloseType, Move: 0, Value: 0, Jump: 3},
-		{Type: token.LeftMoveAddType, Move: 3},
-		{Type: token.EOFType},
-	}
-
-	assertTokens(t, program, tokens)
-}
-
-func TestLexingRightLinearAddLoopOptimisation(t *testing.T) {
-	program := []byte("++++++++++[->+<][->+>+>+<<<][->+>+>+>+>+<<<<<]")
-
-	tokens := []token.Token{
-		{Type: token.AddType, Move: 10, Value: 10},
-		{Type: token.RightMoveAddType, Move: 1},
-		{Type: token.RightLinearAddType, Move: 3},
-		{Type: token.RightLinearAddType, Move: 5},
-		{Type: token.EOFType},
-	}
-
-	assertTokens(t, program, tokens)
-}
-
-func TestLexingLeftLinearAddLoopOptimisation(t *testing.T) {
-	program := []byte("++++++++++[-<+>][-<+<+<+>>>][-<+<+<+<+<+>>>>>]")
-
-	tokens := []token.Token{
-		{Type: token.AddType, Move: 10, Value: 10},
-		{Type: token.LeftMoveAddType, Move: 1},
-		{Type: token.LeftLinearAddType, Move: 3},
-		{Type: token.LeftLinearAddType, Move: 5},
+		{Type: token.CloseType, Move: 0, Jump: 5},
 		{Type: token.EOFType},
 	}
 
@@ -166,6 +103,8 @@ func TestLexingLeftLinearAddLoopOptimisation(t *testing.T) {
 }
 
 func assertTokens(t *testing.T, program []byte, tokens []token.Token) {
+	t.Helper()
+
 	output := New(program).Tokens
 
 	for x := 0; x < len(tokens); x++ {
