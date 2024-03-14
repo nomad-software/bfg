@@ -24,7 +24,7 @@ func (a *nasm) writeFile(name string) {
 	err := os.WriteFile(a.file, []byte(a.src.String()), 0666)
 
 	if err != nil {
-		fmt.Printf("Can't write assembly file (%s). %s\n", a.file, err.Error())
+		fmt.Printf("cannot write assembly file (%s): %s\n", a.file, err)
 		os.Exit(1)
 	}
 }
@@ -35,7 +35,7 @@ func (a *nasm) compile(arch string) {
 
 	err := cmd.Run()
 	if err != nil {
-		fmt.Printf("Can't run the Netwide Assembler (nasm). %s\n", err.Error())
+		fmt.Printf("cannot run the netwide assembler (nasm): %s\n", err)
 		os.Exit(1)
 	}
 }
@@ -43,7 +43,7 @@ func (a *nasm) compile(arch string) {
 func (a *nasm) link(arch string, exe string) {
 	exe, err := filepath.Abs(exe)
 	if err != nil {
-		fmt.Printf("Can't run the GNU linker (ld). %s\n", err.Error())
+		fmt.Printf("cannot run the gnu linker (ld): %s\n", err)
 		os.Exit(1)
 	}
 
@@ -52,7 +52,7 @@ func (a *nasm) link(arch string, exe string) {
 
 	err = cmd.Run()
 	if err != nil {
-		fmt.Printf("Can't run the GNU linker (ld). %s\n", err.Error())
+		fmt.Printf("cannot run the gnu linker (ld): %s\n", err)
 		os.Exit(1)
 	}
 }
@@ -64,7 +64,7 @@ func (a *nasm) run() {
 
 	err := cmd.Run()
 	if err != nil {
-		fmt.Printf("Can't run %s. %s\n", a.exe, err.Error())
+		fmt.Printf("cannot run program: %s - %s\n", a.exe, err)
 		os.Exit(1)
 	}
 }

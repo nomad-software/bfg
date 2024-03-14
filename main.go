@@ -1,6 +1,3 @@
-//go:build !linux
-// +build !linux
-
 package main
 
 import (
@@ -9,7 +6,9 @@ import (
 	"os"
 
 	"github.com/nomad-software/bfg/cli"
-	"github.com/nomad-software/bfg/eval"
+	"github.com/nomad-software/bfg/compiler/golang"
+	"github.com/nomad-software/bfg/compiler/nasm"
+	"github.com/nomad-software/bfg/interpreter/eval"
 	"github.com/nomad-software/bfg/lexer"
 )
 
@@ -19,6 +18,7 @@ func main() {
 
 	if opt.Help {
 		opt.PrintUsage()
+		return
 	}
 
 	program, err := os.ReadFile(opt.File)
@@ -29,9 +29,16 @@ func main() {
 
 	tokens := lexer.New(program).Tokens
 
-	input := bufio.NewReader(os.Stdin)
-	output := bufio.NewWriter(os.Stdout)
-	defer output.Flush()
+	if opt.Interpret {
+		input := bufio.NewReader(os.Stdin)
+		output := bufio.NewWriter(os.Stdout)
+		defer output.Flush()
+		eval.Evaluate(tokens, input, output)
 
-	eval.Evaluate(tokens, input, output)
+	} else if opt.Nasm {
+		nasm.Compile(tokens)
+
+	} else {
+		golang.Compile(tokens)
+	}
 }

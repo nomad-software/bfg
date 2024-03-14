@@ -53,34 +53,6 @@ func Evaluate(tokens []token.Token, input *bufio.Reader, output *bufio.Writer) {
 		case token.ZeroType:
 			stack[ptr] = 0
 
-		case token.RightMoveAddType:
-			if stack[ptr] != 0 {
-				stack[ptr+tokens[x].Move] += stack[ptr]
-				stack[ptr] = 0
-			}
-
-		case token.LeftMoveAddType:
-			if stack[ptr] != 0 {
-				stack[ptr-tokens[x].Move] += stack[ptr]
-				stack[ptr] = 0
-			}
-
-		case token.RightLinearAddType:
-			if stack[ptr] != 0 {
-				for i := 1; i <= tokens[x].Move; i++ {
-					stack[ptr+i] += stack[ptr]
-				}
-				stack[ptr] = 0
-			}
-
-		case token.LeftLinearAddType:
-			if stack[ptr] != 0 {
-				for i := 1; i <= tokens[x].Move; i++ {
-					stack[ptr-i] += stack[ptr]
-				}
-				stack[ptr] = 0
-			}
-
 		case token.EOFType:
 			output.Flush()
 		}
