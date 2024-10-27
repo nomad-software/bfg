@@ -4,11 +4,12 @@ import (
 	"github.com/nomad-software/bfg/token"
 )
 
-// New creates a new instance of the lexer channel.
+// New creates a new instance of the lexer.
 func New(input []byte) *Lexer {
 	l := &Lexer{
 		input:  input,
 		Tokens: make([]token.Token, 0, 4096),
+		loops:  make([]int, 0, 16),
 	}
 	l.run()
 	return l
@@ -107,19 +108,10 @@ func lex(l *Lexer) stateFn {
 		l.skipInvalid()
 		l.discard()
 
-		r := l.advance()
+		b := l.advance()
 
-		switch r {
-		case token.Right:
-			fallthrough
-
-		case token.Left:
-			fallthrough
-
-		case token.Add:
-			fallthrough
-
-		case token.Sub:
+		switch b {
+		case token.Right, token.Left, token.Add, token.Sub:
 			return lexRepeating
 
 		case token.In:
@@ -146,19 +138,17 @@ func lexRepeating(l *Lexer) stateFn {
 		l.advance()
 	}
 
-	if b == token.Right {
+	switch b {
+	case token.Right:
 		l.emit(token.RightType)
-	}
 
-	if b == token.Left {
+	case token.Left:
 		l.emit(token.LeftType)
-	}
 
-	if b == token.Add {
+	case token.Add:
 		l.emit(token.AddType)
-	}
 
-	if b == token.Sub {
+	case token.Sub:
 		l.emit(token.SubType)
 	}
 
