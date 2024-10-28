@@ -7,13 +7,13 @@ import (
 )
 
 const (
-	stackSize = 131072 // 128K
+	stackSize = 1024 * 128
 )
 
 // Evaluate evaluates the program and executes it.
 func Evaluate(tokens []token.Token, input *bufio.Reader, output *bufio.Writer) {
 
-	var stack [stackSize]byte
+	stack := [stackSize]byte{}
 	ptr := 0
 
 	for x := 0; x < len(tokens); x++ {
