@@ -4,17 +4,6 @@ import (
 	"github.com/nomad-software/bfg/token"
 )
 
-// New creates a new instance of the lexer.
-func New(input []byte) *Lexer {
-	l := &Lexer{
-		input:  input,
-		Tokens: make([]token.Token, 0, 4096),
-		loops:  make([]int, 0, 16),
-	}
-	l.run()
-	return l
-}
-
 // Lexer is the instance of the lexer.
 type Lexer struct {
 	input  []byte        // The string being scanned.
@@ -25,6 +14,17 @@ type Lexer struct {
 }
 
 type stateFn func(*Lexer) stateFn
+
+// New creates a new instance of the lexer.
+func New(input []byte) *Lexer {
+	l := &Lexer{
+		input:  input,
+		Tokens: make([]token.Token, 0, 4096),
+		loops:  make([]int, 0, 16),
+	}
+	l.run()
+	return l
+}
 
 func (l *Lexer) run() {
 	for state := lex; state != nil; {
@@ -45,15 +45,16 @@ func (l *Lexer) emit(t token.LexemeType) {
 		Type: t,
 	}
 
-	if t == token.OpenType {
+	switch t {
+	case token.OpenType:
 		l.loops = append(l.loops, len(l.Tokens))
 
-	} else if t == token.CloseType {
+	case token.CloseType:
 		tok.Jump = l.loops[len(l.loops)-1]
 		l.loops = l.loops[:len(l.loops)-1]
 		l.Tokens[tok.Jump].Jump = len(l.Tokens)
 
-	} else {
+	case token.LeftType, token.RightType, token.AddType, token.SubType:
 		tok.Move = len(l.read())
 		tok.Value = byte(len(l.read()))
 	}
@@ -134,6 +135,7 @@ func lex(l *Lexer) stateFn {
 
 func lexRepeating(l *Lexer) stateFn {
 	b := l.read()[0]
+
 	for b == l.peek() {
 		l.advance()
 	}
