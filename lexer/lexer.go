@@ -8,7 +8,8 @@ import (
 type Lexer struct {
 	input  []byte        // The string being scanned.
 	start  int           // Start position of this item.
-	end    int           // Current position in the input.
+	cur    int           // Current position in the input.
+	mrk    int           // Position of saved mark.
 	loops  []int         // Indexes of open lexeme types
 	Tokens []token.Token // Lexed tokens
 }
@@ -18,7 +19,7 @@ type stateFn func(*Lexer) stateFn
 // New creates a new instance of the lexer.
 func New(input []byte) *Lexer {
 	l := &Lexer{
-		input:  input,
+		input:  sanitise(input),
 		Tokens: make([]token.Token, 0, 4096),
 		loops:  make([]int, 0, 16),
 	}
@@ -26,89 +27,98 @@ func New(input []byte) *Lexer {
 	return l
 }
 
+// Sanitise removes all invalid operators from the input.
+func sanitise(input []byte) []byte {
+	result := make([]byte, 0, len(input))
+
+	for _, op := range input {
+		if op == token.Add || op == token.Sub || op == token.Right || op == token.Left || op == token.Open || op == token.Close || op == token.Out || op == token.In {
+			result = append(result, op)
+		}
+	}
+
+	return result
+}
+
+// Run runs the lexer.
 func (l *Lexer) run() {
-	for state := lex; state != nil; {
-		state = state(l)
+	for f := lex; f != nil; {
+		f = f(l)
 	}
 }
 
-func (l *Lexer) read() []byte {
-	return l.input[l.start:l.end]
+// Red returns a slice of bytes from the input that have read so far.
+func (l *Lexer) red() []byte {
+	return l.input[l.start:l.cur]
 }
 
-func (l *Lexer) unread() []byte {
-	return l.input[l.end:]
+// Redbyte returns a the first byte from the input read so far.
+func (l *Lexer) redbyte() byte {
+	return l.red()[0]
 }
 
-func (l *Lexer) emit(t token.LexemeType) {
-	tok := token.Token{
-		Type: t,
-	}
-
-	switch t {
-	case token.OpenType:
-		l.loops = append(l.loops, len(l.Tokens))
-
-	case token.CloseType:
-		tok.Jump = l.loops[len(l.loops)-1]
-		l.loops = l.loops[:len(l.loops)-1]
-		l.Tokens[tok.Jump].Jump = len(l.Tokens)
-
-	case token.LeftType, token.RightType, token.AddType, token.SubType:
-		tok.Move = len(l.read())
-		tok.Value = byte(len(l.read()))
-	}
-
-	l.Tokens = append(l.Tokens, tok)
-	l.start = l.end
+// Unred returns a slice of bytes from the input that have been unread.
+func (l *Lexer) unred() []byte {
+	return l.input[l.cur:]
 }
 
+// Unredbyte returns a the first byte from the input that's so far unread.
+func (l *Lexer) unredbyte() byte {
+	return l.unred()[0]
+}
+
+// Peek returns the next unread byte from the input.
 func (l *Lexer) peek() byte {
-	if l.end >= len(l.input) {
+	if l.cur >= len(l.input) {
 		return token.EOF
 	}
-	return l.unread()[0]
+	return l.unredbyte()
 }
 
-func (l *Lexer) advance() (b byte) {
-	if l.end >= len(l.input) {
+// Advance reads a byte from the input and returns it.
+func (l *Lexer) advance() byte {
+	if l.cur >= len(l.input) {
 		return token.EOF
 	}
-	b = l.unread()[0]
-	l.end++
+	b := l.unredbyte()
+	l.cur++
 	return b
 }
 
-func (l *Lexer) retreat(i int) {
-	if l.end > l.start {
-		l.end -= i
-	}
-}
-
-func (l *Lexer) skipInvalid() {
-	for {
-		b := l.peek()
-		if b == token.EOF {
-			return
-		}
-		for _, op := range token.All {
-			if b == op {
-				return
-			}
-		}
-		l.advance()
-	}
-}
-
+// Discard discards all bytes read so far.
 func (l *Lexer) discard() {
-	l.start = l.end
+	l.start = l.cur
+}
+
+// Mark saves a point to return to in the input.
+func (l *Lexer) mark() {
+	l.mrk = l.cur
+}
+
+// Reset returns to the saved mark.
+func (l *Lexer) reset() {
+	l.cur = l.mrk
+	l.mrk = l.cur
+}
+
+// Emit emits a token.
+func (l *Lexer) emit(t token.LexemeType, move int, value byte, jump int) {
+	tok := token.Token{
+		Type:  t,
+		Move:  move,
+		Value: value,
+		Jump:  jump,
+	}
+
+	if t == token.CloseType {
+		l.Tokens[jump].Jump = len(l.Tokens)
+	}
+
+	l.Tokens = append(l.Tokens, tok)
 }
 
 func lex(l *Lexer) stateFn {
 	for {
-		l.skipInvalid()
-		l.discard()
-
 		b := l.advance()
 
 		switch b {
@@ -116,16 +126,16 @@ func lex(l *Lexer) stateFn {
 			return lexRepeating
 
 		case token.In:
-			l.emit(token.InType)
+			return lexIn
 
 		case token.Out:
-			l.emit(token.OutType)
+			return lexOut
 
 		case token.Open:
 			return lexOpen
 
 		case token.Close:
-			l.emit(token.CloseType)
+			return lexClose
 
 		case token.EOF:
 			return lexEOF
@@ -134,52 +144,161 @@ func lex(l *Lexer) stateFn {
 }
 
 func lexRepeating(l *Lexer) stateFn {
-	b := l.read()[0]
+	b := l.redbyte()
+
+	move := 1
+	value := byte(1)
 
 	for b == l.peek() {
+		move++
+		value++
 		l.advance()
 	}
 
 	switch b {
 	case token.Right:
-		l.emit(token.RightType)
+		l.emit(token.RightType, move, 0, 0)
 
 	case token.Left:
-		l.emit(token.LeftType)
+		l.emit(token.LeftType, move, 0, 0)
 
 	case token.Add:
-		l.emit(token.AddType)
+		l.emit(token.AddType, 0, value, 0)
 
 	case token.Sub:
-		l.emit(token.SubType)
+		l.emit(token.SubType, 0, value, 0)
 	}
+
+	l.discard()
+
+	return lex
+}
+
+func lexIn(l *Lexer) stateFn {
+	l.emit(token.InType, 0, 0, 0)
+	l.discard()
+	return lex
+}
+
+func lexOut(l *Lexer) stateFn {
+	l.emit(token.OutType, 0, 0, 0)
+	l.discard()
+	return lex
+}
+
+func lexOpen(l *Lexer) stateFn {
+	if s := lexZeroLoop(l); s != nil {
+		return s
+	}
+
+	if s := lexMulLoop(l); s != nil {
+		return s
+	}
+
+	l.loops = append(l.loops, len(l.Tokens))
+	l.emit(token.OpenType, 0, 0, 0)
+	l.discard()
 
 	return lex
 }
 
 func lexZeroLoop(l *Lexer) stateFn {
-	if l.peek() == token.Sub {
-		l.advance()
-		if l.peek() == token.Close {
-			l.advance()
-			l.emit(token.ZeroType)
-			return lex
-		}
-		l.retreat(1)
+	if l.peek() != token.Sub {
+		return nil
 	}
+
+	l.mark()
+	l.advance()
+
+	if l.peek() == token.Close {
+		l.advance()
+		l.emit(token.ZeroType, 0, 0, 0)
+		l.discard()
+		return lex
+	}
+
+	l.reset()
 	return nil
 }
 
-func lexOpen(l *Lexer) stateFn {
-	s := lexZeroLoop(l)
-	if s != nil {
-		return s
+func lexMulLoop(l *Lexer) stateFn {
+	if l.peek() != token.Sub {
+		return nil
 	}
-	l.emit(token.OpenType)
+
+	l.mark()
+
+	for {
+		b := l.advance()
+
+		if b == token.Open || b == token.In || b == token.Out {
+			l.reset()
+			return nil
+
+		} else if b == token.Close {
+			l.reset()
+			break
+		}
+	}
+
+	l.advance()
+
+	move := 0
+
+	for {
+		b := l.peek()
+
+		if b == token.Left || b == token.Right {
+			if b == token.Left {
+				move--
+			} else {
+				move++
+			}
+
+			l.advance()
+
+			if l.peek() == token.Add {
+				l.advance()
+				value := byte(1)
+				for l.peek() == token.Add {
+					l.advance()
+					value++
+				}
+				l.emit(token.MulAddType, move, value, 0)
+			}
+
+			if l.peek() == token.Sub {
+				l.advance()
+				value := byte(1)
+				for l.peek() == token.Sub {
+					l.advance()
+					value++
+				}
+				l.emit(token.MulSubType, move, value, 0)
+			}
+		}
+
+		if b == token.Close {
+			l.advance()
+			l.emit(token.ZeroType, 0, 0, 0)
+			l.discard()
+			return lex
+		}
+	}
+}
+
+func lexClose(l *Lexer) stateFn {
+	jump := l.loops[len(l.loops)-1]
+	l.loops = l.loops[:len(l.loops)-1]
+
+	l.emit(token.CloseType, 0, 0, jump)
+	l.discard()
+
 	return lex
 }
 
 func lexEOF(l *Lexer) stateFn {
-	l.emit(token.EOFType)
+	l.emit(token.EOFType, 0, 0, 0)
+	l.discard()
 	return nil
 }

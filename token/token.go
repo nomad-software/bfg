@@ -15,7 +15,7 @@ const (
 
 var (
 	// All exported operators.
-	All = []byte{Left, Right, Add, Sub, In, Out, Open, Close}
+	All = []byte{Add, Sub, Right, Left, Open, Close, Out, In}
 )
 
 // LexemeType is a lexeme type.
@@ -33,6 +33,8 @@ const (
 	CloseType
 	EOFType
 	ZeroType
+	MulAddType
+	MulSubType
 )
 
 // Token represents a unit of output from the lexer.

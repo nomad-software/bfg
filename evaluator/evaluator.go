@@ -50,6 +50,16 @@ func Evaluate(tokens []token.Token, input *bufio.Reader, output *bufio.Writer) {
 				x = tokens[x].Jump
 			}
 
+		case token.MulAddType:
+			if stack[ptr] != 0 {
+				stack[ptr+tokens[x].Move] += (stack[ptr] * tokens[x].Value)
+			}
+
+		case token.MulSubType:
+			if stack[ptr] != 0 {
+				stack[ptr+tokens[x].Move] -= (stack[ptr] * tokens[x].Value)
+			}
+
 		case token.ZeroType:
 			stack[ptr] = 0
 

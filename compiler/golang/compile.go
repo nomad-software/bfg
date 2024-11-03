@@ -22,7 +22,7 @@ func newSource(tokens []token.Token) Go {
 	src.write(")")
 
 	src.write("var (")
-	src.write("stack = [131072]byte{}") // 128K
+	src.write("stack = [1024*128]byte{}")
 	src.write("ptr = 0")
 	src.write("input = bufio.NewReader(os.Stdin)")
 	src.write("output = bufio.NewWriter(os.Stdout)")
@@ -65,6 +65,16 @@ func newSource(tokens []token.Token) Go {
 			src.write("goto open_%d", t.Jump)
 			src.write("}")
 			src.write("close_%d:", t.Jump)
+
+		case token.MulAddType:
+			src.write("if stack[ptr] != 0 {")
+			src.write("stack[ptr + %d] += (stack[ptr] * %d)", t.Move, t.Value)
+			src.write("}")
+
+		case token.MulSubType:
+			src.write("if stack[ptr] != 0 {")
+			src.write("stack[ptr + %d] -= (stack[ptr] * %d)", t.Move, t.Value)
+			src.write("}")
 
 		case token.ZeroType:
 			src.write("stack[ptr] = 0")

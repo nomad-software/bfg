@@ -60,6 +60,26 @@ func newAssembly(tokens []token.Token) nasm {
 			asm.write("jne open_loop_%d", t.Jump)
 			asm.write("close_loop_%d:", t.Jump)
 
+		case token.MulAddType:
+			asm.write("cmp byte [r8], 0")
+			asm.write("je close_loop_%d", i)
+			asm.write("open_loop_%d:", i)
+			asm.write("mov byte al, [r8]")
+			asm.write("mov byte bl, %d", t.Value)
+			asm.write("mul byte bl")
+			asm.write("add byte [r8+%d], al", t.Move)
+			asm.write("close_loop_%d:", i)
+
+		case token.MulSubType:
+			asm.write("cmp byte [r8], 0")
+			asm.write("je close_loop_%d", i)
+			asm.write("open_loop_%d:", i)
+			asm.write("mov byte al, [r8]")
+			asm.write("mov byte bl, %d", t.Value)
+			asm.write("mul byte bl")
+			asm.write("sub byte [r8+%d], al", t.Move)
+			asm.write("close_loop_%d:", i)
+
 		case token.ZeroType:
 			asm.write("mov byte [r8], 0")
 		}
@@ -70,7 +90,7 @@ func newAssembly(tokens []token.Token) nasm {
 	asm.write("syscall")
 
 	asm.write("section .bss")
-	asm.write("stack: resb 131072") // 128K
+	asm.write("stack: resb %d", 1024*128) // 128K
 
 	return asm
 }
