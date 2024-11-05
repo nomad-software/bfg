@@ -8,11 +8,12 @@ import (
 
 // Options contain the command line options passed to the program.
 type Options struct {
-	File      string
-	Exe       string
-	Interpret bool
-	Nasm      bool
-	Help      bool
+	File string
+	Exe  string
+	Go   bool
+	Nasm bool
+	C    bool
+	Help bool
 }
 
 // ParseOptions parses the command line options.
@@ -20,8 +21,9 @@ func ParseOptions() *Options {
 	var opt Options
 
 	flag.StringVar(&opt.File, "f", "", "The program file to run.")
-	flag.BoolVar(&opt.Interpret, "i", false, "Use the cross-platform interpreter")
+	flag.BoolVar(&opt.Go, "g", false, "Use the go compiler")
 	flag.BoolVar(&opt.Nasm, "n", false, "Use the nasm compiler")
+	flag.BoolVar(&opt.C, "c", false, "Use the c compiler")
 	flag.BoolVar(&opt.Help, "help", false, "Show help.")
 	flag.Parse()
 
@@ -41,11 +43,13 @@ A fast brainfuck interpreter and compiler.
 
 Modes:
 
-1. Dynamic interpreter      slowest
-2. Go compiler (default)    medium
-3. Nasm compiler            fastest
+1. Cross-platform interpreter  slowest  (default)
+2. Go compiler                 medium
+3. Nasm compiler               fast
+4. C compiler                  fastest
 
-Nasm can be installed on Linux with the following command:
+Compilers can be installed on Linux with the following commands:
+$ sudo apt install build-essentials
 $ sudo apt install nasm
 `
 	fmt.Println(banner)

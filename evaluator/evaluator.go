@@ -10,7 +10,7 @@ const (
 	stackSize = 1024 * 128
 )
 
-// Evaluate evaluates the program and executes it.
+// Evaluate executes the program as it reads it.
 func Evaluate(tokens []token.Token, input *bufio.Reader, output *bufio.Writer) {
 
 	stack := [stackSize]byte{}

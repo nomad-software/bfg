@@ -6,13 +6,13 @@ import (
 	"os"
 
 	"github.com/nomad-software/bfg/cli"
+	"github.com/nomad-software/bfg/compiler/c"
 	"github.com/nomad-software/bfg/compiler/golang"
 	"github.com/nomad-software/bfg/compiler/nasm"
 	"github.com/nomad-software/bfg/evaluator"
 	"github.com/nomad-software/bfg/lexer"
 )
 
-// Evaluate the program.
 func main() {
 	opt := cli.ParseOptions()
 
@@ -29,16 +29,19 @@ func main() {
 
 	tokens := lexer.New(program).Tokens
 
-	if opt.Interpret {
-		input := bufio.NewReader(os.Stdin)
-		output := bufio.NewWriter(os.Stdout)
-		defer output.Flush()
-		evaluator.Evaluate(tokens, input, output)
+	if opt.Go {
+		golang.Compile(tokens)
 
 	} else if opt.Nasm {
 		nasm.Compile(tokens)
 
+	} else if opt.C {
+		c.Compile(tokens)
+
 	} else {
-		golang.Compile(tokens)
+		input := bufio.NewReader(os.Stdin)
+		output := bufio.NewWriter(os.Stdout)
+		defer output.Flush()
+		evaluator.Evaluate(tokens, input, output)
 	}
 }

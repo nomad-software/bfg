@@ -4,7 +4,7 @@ import (
 	"github.com/nomad-software/bfg/token"
 )
 
-// Compile creates an executable for a particular architecture.
+// Compile creates an executable and runs it.
 func Compile(tokens []token.Token) {
 	asm := newSource(tokens)
 	asm.writeFile("/tmp/bfg.go")

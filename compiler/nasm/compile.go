@@ -4,17 +4,17 @@ import (
 	"github.com/nomad-software/bfg/token"
 )
 
-// Compile creates an executable for a particular architecture.
+// Compile creates an executable and runs it.
 func Compile(tokens []token.Token) {
-	asm := newAssembly(tokens)
+	asm := newSource(tokens)
 	asm.writeFile("/tmp/bfg.asm")
 	asm.compile("elf64")
 	asm.link("elf_x86_64", "/tmp/bfg")
 	asm.run()
 }
 
-func newAssembly(tokens []token.Token) nasm {
-	var asm nasm
+func newSource(tokens []token.Token) Nasm {
+	var asm Nasm
 
 	asm.write("global _start")
 	asm.write("section .text")
