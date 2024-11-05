@@ -111,6 +111,31 @@ func Benchmark99Bottles(b *testing.B) {
 	tokens = t
 }
 
+func BenchmarkTwinkle(b *testing.B) {
+	wd, err := os.Getwd()
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	program, err := os.ReadFile(path.Join(wd, "../programs/twinkle.bf"))
+	if err != nil {
+		log.Fatalln(err)
+	}
+	var t []token.Token
+
+	b.SetBytes(int64(len(program)))
+	b.ReportAllocs()
+	b.ResetTimer()
+
+	for x := 0; x < b.N; x++ {
+		t = New(program).Tokens
+	}
+
+	b.ReportMetric(float64(len(t)), "tokens")
+
+	tokens = t
+}
+
 func BenchmarkSierpinski(b *testing.B) {
 	wd, err := os.Getwd()
 	if err != nil {
@@ -177,6 +202,23 @@ func TestLexingMultipleOperators(t *testing.T) {
 		{Type: token.InType, Move: 0, Value: 0},
 		{Type: token.InType, Move: 0, Value: 0},
 		{Type: token.OutType, Move: 0, Value: 0},
+		{Type: token.EOFType},
+	}
+
+	assertTokens(t, program, tokens)
+}
+
+func TestLexingOverflowLoop(t *testing.T) {
+	program := []byte("-[--->+<]")
+
+	tokens := []token.Token{
+		{Type: token.SubType, Move: 0, Value: 1},
+		{Type: token.OpenType, Move: 0, Value: 0, Jump: 6},
+		{Type: token.SubType, Move: 0, Value: 3},
+		{Type: token.RightType, Move: 1, Value: 0},
+		{Type: token.AddType, Move: 0, Value: 1},
+		{Type: token.LeftType, Move: 1, Value: 0},
+		{Type: token.CloseType, Move: 0, Value: 0, Jump: 1},
 		{Type: token.EOFType},
 	}
 

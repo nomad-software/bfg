@@ -1,5 +1,7 @@
 package token
 
+import "fmt"
+
 // Brainfuck operators.
 const (
 	Left  byte = '<'
@@ -49,4 +51,9 @@ type Token struct {
 	Value byte       // A delta value to modify a stack cell's value (packed to word boundry by compiler)
 	Jump  int        // A matching position of a lexeme
 	_     struct{}   // Prevent unkeyed literals and let the compiler pack it to a word boundry
+}
+
+// String implements the stringer interface.
+func (t Token) String() string {
+	return fmt.Sprintf("type: %d, move: %d, value: %d, jump: %d", t.Type, t.Move, t.Value, t.Jump)
 }

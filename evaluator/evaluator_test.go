@@ -119,6 +119,33 @@ func Benchmark99Bottles(b *testing.B) {
 	b.ReportMetric(float64(len(tokens)), "tokens")
 }
 
+func BenchmarkTwinkle(b *testing.B) {
+	wd, err := os.Getwd()
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	program, err := os.ReadFile(path.Join(wd, "../programs/twinkle.bf"))
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	input := bufio.NewReader(os.Stdin)
+	output := bufio.NewWriter(io.Discard)
+	defer output.Flush()
+
+	tokens := lexer.New(program).Tokens
+
+	b.ReportAllocs()
+	b.ResetTimer()
+
+	for x := 0; x < b.N; x++ {
+		Evaluate(tokens, input, output)
+	}
+
+	b.ReportMetric(float64(len(tokens)), "tokens")
+}
+
 func BenchmarkSierpinski(b *testing.B) {
 	wd, err := os.Getwd()
 	if err != nil {

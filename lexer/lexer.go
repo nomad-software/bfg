@@ -87,6 +87,7 @@ func (l *Lexer) advance() byte {
 
 // Discard discards all bytes read so far.
 func (l *Lexer) discard() {
+	// fmt.Printf("% 20s   %s\n", l.red(), l.Tokens[len(l.Tokens)-1])
 	l.start = l.cur
 }
 
@@ -227,6 +228,12 @@ func lexMulLoop(l *Lexer) stateFn {
 	}
 
 	l.mark()
+	l.advance()
+
+	if l.peek() == token.Sub || l.peek() == token.Add {
+		l.reset()
+		return nil
+	}
 
 	for {
 		b := l.advance()
