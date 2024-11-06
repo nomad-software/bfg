@@ -11,6 +11,7 @@ import (
 type Go struct {
 	src  strings.Builder
 	file string
+	exe  string
 }
 
 func (a *Go) write(format string, args ...interface{}) {
@@ -27,20 +28,33 @@ func (a *Go) writeFile(name string) {
 	}
 }
 
-func (a *Go) run() {
-	file, err := filepath.Abs(a.file)
+func (a *Go) compile(exe string) {
+	exe, err := filepath.Abs(exe)
 	if err != nil {
-		fmt.Printf("cannot get absolute path to go file: %s\n", err)
+		fmt.Printf("cannot run go compiler: %s\n", err)
 		os.Exit(1)
 	}
 
-	cmd := exec.Command("go", "run", file)
-	cmd.Stdin = os.Stdin
+	a.exe = exe
+	cmd := exec.Command("go", "build", "-o", a.exe, a.file)
 	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
 
 	err = cmd.Run()
 	if err != nil {
-		fmt.Printf("cannot run program: %s - %s\n", a.file, err)
+		fmt.Printf("cannot run go compiler: %s\n", err)
+		os.Exit(1)
+	}
+}
+
+func (a *Go) run() {
+	cmd := exec.Command(a.exe)
+	cmd.Stdin = os.Stdin
+	cmd.Stdout = os.Stdout
+
+	err := cmd.Run()
+	if err != nil {
+		fmt.Printf("cannot run program: %s - %s\n", a.exe, err)
 		os.Exit(1)
 	}
 }

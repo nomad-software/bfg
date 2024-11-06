@@ -6,9 +6,10 @@ import (
 
 // Compile creates an executable and runs it.
 func Compile(tokens []token.Token) {
-	asm := newSource(tokens)
-	asm.writeFile("/tmp/bfg.go")
-	asm.run()
+	g := newSource(tokens)
+	g.writeFile("/tmp/bfg.go")
+	g.compile("/tmp/bfg")
+	g.run()
 }
 
 func newSource(tokens []token.Token) Go {
