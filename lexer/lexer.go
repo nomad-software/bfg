@@ -150,7 +150,7 @@ func lexRepeating(l *Lexer) stateFn {
 	move := 1
 	value := byte(1)
 
-	for b == l.peek() {
+	for l.peek() == b {
 		move++
 		value++
 		l.advance()
@@ -211,8 +211,7 @@ func lexZeroLoop(l *Lexer) stateFn {
 	l.mark()
 	l.advance()
 
-	if l.peek() == token.Close {
-		l.advance()
+	if l.advance() == token.Close {
 		l.emit(token.ZeroType, 0, 0, 0)
 		l.discard()
 		return lex
@@ -230,7 +229,7 @@ func lexMulLoop(l *Lexer) stateFn {
 	l.mark()
 	l.advance()
 
-	if l.peek() == token.Sub || l.peek() == token.Add {
+	if b := l.advance(); b != token.Right && b != token.Left {
 		l.reset()
 		return nil
 	}
@@ -253,40 +252,32 @@ func lexMulLoop(l *Lexer) stateFn {
 	move := 0
 
 	for {
-		b := l.peek()
+		b := l.advance()
 
-		if b == token.Left || b == token.Right {
-			if b == token.Left {
-				move--
-			} else {
-				move++
-			}
+		switch b {
+		case token.Right:
+			move++
 
-			l.advance()
+		case token.Left:
+			move--
 
-			if l.peek() == token.Add {
+		case token.Add:
+			value := byte(1)
+			for l.peek() == b {
 				l.advance()
-				value := byte(1)
-				for l.peek() == token.Add {
-					l.advance()
-					value++
-				}
-				l.emit(token.MulAddType, move, value, 0)
+				value++
 			}
+			l.emit(token.MulAddType, move, value, 0)
 
-			if l.peek() == token.Sub {
+		case token.Sub:
+			value := byte(1)
+			for l.peek() == b {
 				l.advance()
-				value := byte(1)
-				for l.peek() == token.Sub {
-					l.advance()
-					value++
-				}
-				l.emit(token.MulSubType, move, value, 0)
+				value++
 			}
-		}
+			l.emit(token.MulSubType, move, value, 0)
 
-		if b == token.Close {
-			l.advance()
+		case token.Close:
 			l.emit(token.ZeroType, 0, 0, 0)
 			l.discard()
 			return lex
