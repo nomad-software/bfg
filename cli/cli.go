@@ -24,7 +24,7 @@ func ParseOptions() *Options {
 	flag.BoolVar(&opt.Go, "g", false, "Use the go compiler")
 	flag.BoolVar(&opt.Nasm, "n", false, "Use the nasm compiler")
 	flag.BoolVar(&opt.C, "c", false, "Use the c compiler")
-	flag.BoolVar(&opt.Help, "help", false, "Show help.")
+	flag.BoolVar(&opt.Help, "h", false, "Show help.")
 	flag.Parse()
 
 	return &opt
