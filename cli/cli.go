@@ -49,7 +49,7 @@ Modes:
 4. C compiler                  fastest
 
 Compilers can be installed on Linux with the following commands:
-$ sudo apt install build-essentials
+$ sudo apt install build-essential
 $ sudo apt install nasm
 `
 	fmt.Println(banner)
