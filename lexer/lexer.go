@@ -10,7 +10,7 @@ type Lexer struct {
 	start  int           // Start position of this item.
 	cur    int           // Current position in the input.
 	mrk    int           // Position of saved mark.
-	loops  []int         // Indexes of open lexeme types
+	loops  []int         // Indexes of open token types
 	Tokens []token.Token // Lexed tokens
 }
 
@@ -103,7 +103,7 @@ func (l *Lexer) reset() {
 }
 
 // Emit emits a token.
-func (l *Lexer) emit(t token.LexemeType, move int, value byte, jump int) {
+func (l *Lexer) emit(t token.TokenType, move int, value byte, jump int) {
 	tok := token.Token{
 		Type:  t,
 		Move:  move,
