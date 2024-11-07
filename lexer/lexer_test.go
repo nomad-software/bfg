@@ -319,6 +319,20 @@ func TestLexingMultiplicationOptimisation6(t *testing.T) {
 	assertTokens(t, program, tokens)
 }
 
+func TestLexingScanOptimisation(t *testing.T) {
+	program := []byte("[-<<<->>>][>>>>][<]")
+
+	tokens := []token.Token{
+		{Type: token.MulSubType, Move: -3, Value: 1},
+		{Type: token.ZeroType, Move: 0, Value: 0},
+		{Type: token.ScanRightType, Move: 4, Value: 0},
+		{Type: token.ScanLeftType, Move: 1, Value: 0},
+		{Type: token.EOFType},
+	}
+
+	assertTokens(t, program, tokens)
+}
+
 func assertTokens(t *testing.T, program []byte, tokens []token.Token) {
 	t.Helper()
 

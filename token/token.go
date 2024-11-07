@@ -37,6 +37,8 @@ const (
 	ZeroType
 	MulAddType
 	MulSubType
+	ScanRightType
+	ScanLeftType
 )
 
 // Token represents a unit of output from the lexer.

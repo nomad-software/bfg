@@ -77,6 +77,12 @@ func newSource(tokens []token.Token) Go {
 			src.write("stack[ptr + %d] -= (stack[ptr] * %d)", t.Move, t.Value)
 			src.write("}")
 
+		case token.ScanRightType:
+			src.write("for ; stack[ptr] != 0; ptr += %d {}", t.Move)
+
+		case token.ScanLeftType:
+			src.write("for ; stack[ptr] != 0; ptr -= %d {}", t.Move)
+
 		case token.ZeroType:
 			src.write("stack[ptr] = 0")
 		}

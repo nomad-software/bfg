@@ -192,6 +192,10 @@ func lexOpen(l *Lexer) stateFn {
 		return s
 	}
 
+	if s := lexScanLoop(l); s != nil {
+		return s
+	}
+
 	if s := lexMulLoop(l); s != nil {
 		return s
 	}
@@ -219,6 +223,39 @@ func lexZeroLoop(l *Lexer) stateFn {
 
 	l.reset()
 	return nil
+}
+
+func lexScanLoop(l *Lexer) stateFn {
+	if l.peek() == token.Close {
+		return nil
+	}
+
+	l.mark()
+	tok := token.ZeroType
+	move := 0
+
+	for {
+		b := l.advance()
+
+		switch b {
+		case token.Right:
+			tok = token.ScanRightType
+			move++
+
+		case token.Left:
+			tok = token.ScanLeftType
+			move++
+
+		case token.Close:
+			l.emit(tok, move, 0, 0)
+			l.discard()
+			return lex
+
+		default:
+			l.reset()
+			return nil
+		}
+	}
 }
 
 func lexMulLoop(l *Lexer) stateFn {

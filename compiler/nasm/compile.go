@@ -80,6 +80,24 @@ func newSource(tokens []token.Token) Nasm {
 			asm.write("sub byte [r8+%d], al", t.Move)
 			asm.write("close_loop_%d:", i)
 
+		case token.ScanRightType:
+			asm.write("cmp byte [r8], 0")
+			asm.write("je close_loop_%d", i)
+			asm.write("open_loop_%d:", i)
+			asm.write("add r8, %d", t.Move)
+			asm.write("cmp byte [r8], 0")
+			asm.write("jne open_loop_%d", i)
+			asm.write("close_loop_%d:", i)
+
+		case token.ScanLeftType:
+			asm.write("cmp byte [r8], 0")
+			asm.write("je close_loop_%d", i)
+			asm.write("open_loop_%d:", i)
+			asm.write("sub r8, %d", t.Move)
+			asm.write("cmp byte [r8], 0")
+			asm.write("jne open_loop_%d", i)
+			asm.write("close_loop_%d:", i)
+
 		case token.ZeroType:
 			asm.write("mov byte [r8], 0")
 		}

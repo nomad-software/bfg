@@ -60,6 +60,14 @@ func Evaluate(tokens []token.Token, input *bufio.Reader, output *bufio.Writer) {
 				stack[ptr+tokens[x].Move] -= (stack[ptr] * tokens[x].Value)
 			}
 
+		case token.ScanRightType:
+			for ; stack[ptr] != 0; ptr += tokens[x].Move {
+			}
+
+		case token.ScanLeftType:
+			for ; stack[ptr] != 0; ptr -= tokens[x].Move {
+			}
+
 		case token.ZeroType:
 			stack[ptr] = 0
 
