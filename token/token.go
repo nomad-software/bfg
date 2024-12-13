@@ -15,11 +15,6 @@ const (
 	EOF   byte = 255
 )
 
-var (
-	// All exported operators.
-	All = []byte{Add, Sub, Right, Left, Open, Close, Out, In}
-)
-
 // TokenType is a token type.
 type TokenType int
 
