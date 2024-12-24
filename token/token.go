@@ -42,6 +42,7 @@ type Token struct {
 	Move  int       // An amount to move the stack pointer.
 	Value byte      // A delta value to modify a stack cell's value.
 	Jump  int       // A matching position of a token.
+	_     struct{}  // Prevent unkeyed literals and let the compiler pack it to a word boundry
 }
 
 // String implements the stringer interface.
