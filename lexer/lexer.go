@@ -32,7 +32,9 @@ func sanitise(input []byte) []byte {
 	result := make([]byte, 0, len(input))
 
 	for _, op := range input {
-		if op == token.Add || op == token.Sub || op == token.Right || op == token.Left || op == token.Open || op == token.Close || op == token.Out || op == token.In {
+		switch op {
+		case token.Add, token.Sub, token.Right, token.Left,
+			token.Open, token.Close, token.Out, token.In:
 			result = append(result, op)
 		}
 	}
@@ -47,24 +49,14 @@ func (l *Lexer) run() {
 	}
 }
 
-// Red returns a slice of bytes from the input that have read so far.
-func (l *Lexer) red() []byte {
-	return l.input[l.start:l.cur]
-}
-
 // Redbyte returns a the first byte from the input read so far.
 func (l *Lexer) redbyte() byte {
-	return l.red()[0]
-}
-
-// Unred returns a slice of bytes from the input that have been unread.
-func (l *Lexer) unred() []byte {
-	return l.input[l.cur:]
+	return l.input[l.start]
 }
 
 // Unredbyte returns a the first byte from the input that's so far unread.
 func (l *Lexer) unredbyte() byte {
-	return l.unred()[0]
+	return l.input[l.cur]
 }
 
 // Peek returns the next unread byte from the input.
